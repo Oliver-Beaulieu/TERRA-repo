@@ -39,7 +39,7 @@ See [docs/ImportantTips.md](docs/ImportantTips.md) for tips on hot reloading, re
 
 ## Deployment
 
-Each team's fork is automatically deployed to the course Coolify server (`coolify.cs4535.cloud`) on every push to `main`. Apps are reachable at `team{N}.neu-in-leuven.cloud`.
+Each team's fork is automatically deployed to the course Coolify server (`coolify.cs4535.cloud`) on every push to `main`. Each team picks its own name and gets a dedicated Coolify team they can log in to; apps are reachable at `<team-name>.neu-in-leuven.cloud`.
 
 - Students: see [docs/StudentDeployment.md](docs/StudentDeployment.md).
 - Staff (per-team onboarding checklist): see [docs/Deployment.md](docs/Deployment.md).

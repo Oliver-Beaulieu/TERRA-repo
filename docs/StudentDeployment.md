@@ -2,12 +2,16 @@
 
 Your team's app is automatically deployed to the course's Coolify server whenever you push to `main`.
 
+## Your team name
+
+Your team picks its own short name (lowercase letters, digits, and hyphens — no spaces). That name is used as your subdomain *and* as your Coolify team name. Pick something you don't mind seeing in a URL — staff will set it up once and changes are a hassle afterwards.
+
+Examples: `team-zenith`, `belgium-builders`, `ngo-insight`.
+
 ## URLs
 
-- **Your Streamlit app:** `https://team{N}.neu-in-leuven.cloud`
-- **Your Flask API (optional, ask staff):** `https://team{N}-api.neu-in-leuven.cloud`
-
-Ask course staff for your specific team number if you don't know it yet.
+- **Your Streamlit app:** `https://<your-team-name>.neu-in-leuven.cloud`
+- **Your Flask API (optional, ask staff):** `https://<your-team-name>-api.neu-in-leuven.cloud`
 
 By default only the Streamlit app is publicly reachable. The Streamlit app talks to the Flask API through the internal Docker network, so you don't need a public API URL for the app to work. If you specifically want to hit your API from outside (e.g. with `curl` or Postman), ask staff to enable the API domain for your team.
 
@@ -22,11 +26,17 @@ No GitHub Actions runs. No CI to pass. The deploy is triggered purely by the pus
 
 ## Watching a deploy / reading logs
 
-Course staff can grant you view-only access to the Coolify dashboard at `coolify.cs4535.cloud`. There you can:
+You have your own **Coolify team** — staff invites each team member by email, and once you accept the invite you can log in to [`coolify.cs4535.cloud`](https://coolify.cs4535.cloud) and see only your team's resource.
 
-- See the live deploy progress.
+In your team's dashboard you can:
+
+- See the live deploy progress when you push.
 - Read container logs (`app`, `api`, `db`) — useful when something works locally but not in production.
-- Manually trigger a redeploy.
+- Trigger a manual redeploy (if your role permits — staff sets this).
+
+If you log in and don't see your team's deployment, check the team-switcher at the top of the Coolify UI — Coolify drops you into a default/personal team on login, and you may need to switch contexts into your course team.
+
+Environment variables (`SECRET_KEY`, `MYSQL_ROOT_PASSWORD`, etc.) are managed by staff. Ask them if you need a value changed.
 
 ## A note on the database
 
@@ -43,13 +53,9 @@ Both local dev and production run MySQL **without a persistent volume**. Every f
 
 Everything else — service names, ports, the MySQL schema — is the same in both.
 
-## Changing a secret or env var
-
-The values of `SECRET_KEY`, `MYSQL_ROOT_PASSWORD`, etc., live in Coolify's UI, not in your repo. To change one, ask course staff.
-
 ## When things break
 
-1. Check the Coolify logs first (or ask staff to).
+1. Check your team's Coolify logs first.
 2. The most common failure is an SQL syntax error in `database-files/*.sql` — those scripts run on **every** deploy (the database is reseeded from scratch each time), so a bad SQL file will block the whole stack until you fix it. Look at the `db` container logs for the offending line.
 3. The second most common is a Python dependency installed locally but missing from `requirements.txt`. If your app works from a *clean* `docker compose up` locally, it will work in production.
 4. The third: hard-coded paths or URLs that work locally but break under the production hostname. If something works locally and 404s in production, suspect a hard-coded `localhost` or `127.0.0.1` somewhere.

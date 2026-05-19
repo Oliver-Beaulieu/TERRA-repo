@@ -3,8 +3,10 @@
 Staff-facing checklist for deploying each student team's fork to the course Coolify server.
 
 - **Coolify dashboard:** [coolify.cs4535.cloud](https://coolify.cs4535.cloud)
-- **Team app domain:** `team{N}.neu-in-leuven.cloud`
-- **Team API domain (optional):** `team{N}-api.neu-in-leuven.cloud`
+- **Team app domain:** `<team-name>.neu-in-leuven.cloud`
+- **Team API domain (optional):** `<team-name>-api.neu-in-leuven.cloud`
+
+Each student team chooses their own short, DNS-friendly name (lowercase letters/digits/hyphens, no spaces, ≤63 characters, no leading/trailing hyphen). This name is used as the subdomain *and* as the Coolify team name, so they line up.
 
 The deploy model is **pure Coolify with no GitHub Actions**: Coolify watches each team's GitHub fork via a webhook and redeploys on every push to `main`. The repo ships a dedicated `docker-compose.prod.yaml` that Coolify uses to build and run the stack.
 
@@ -30,7 +32,7 @@ No DNS work per team afterwards — just pick a hostname and Coolify handles the
 
 The Coolify server's own record at `coolify.cs4535.cloud` is unchanged either way — only deployed team apps live under `neu-in-leuven.cloud`.
 
-Verify with `dig team1.neu-in-leuven.cloud +short` — it should return the right droplet's IP before you try to deploy.
+Verify with `dig <team-name>.neu-in-leuven.cloud +short` (substitute any team's chosen name) — it should return the right droplet's IP before you try to deploy.
 
 ### 2. Server sizing
 
@@ -56,32 +58,43 @@ A Personal Access Token works as a fallback if the GitHub App route is blocked.
 
 ## Per-team onboarding (~5 min per team)
 
-Repeat for each team. Use `team1`, `team2`, etc. as the subdomain prefix.
+Repeat for each team. Confirm the team's chosen name first (e.g. `team-zenith`, `belgium-builders`) and use it consistently as both the Coolify team name and the subdomain prefix.
 
-### Step 1 — Create the resource in Coolify
+### Step 1 — Create the Coolify team and invite members
 
-1. Open `coolify.cs4535.cloud` → select the course project (or create one) → **+ New Resource**.
+In Coolify, "teams" are the multi-tenancy boundary. Each student team gets its own Coolify team, with its own resources, members, and access controls. Students see only their own team's deployment when they log in.
+
+1. In Coolify, open the team switcher (top-left/right depending on version) → **+ New Team** (or **Teams → Create**).
+2. Name the team using the student team's chosen name (e.g. `team-zenith`).
+3. Open the new team → **Members** (or **Settings → Members**) → invite each student by email. Pick a role appropriate for the course — typically a role that lets them view the resource, read logs, and trigger redeploys, but **not** modify environment variables or destroy the resource. (Staff stays as admin/owner.)
+4. Switch your active context into this team before creating the resource — every resource you create from now on lives under whichever team is currently active.
+
+### Step 2 — Create the resource in Coolify
+
+(While the new team is the active context.)
+
+1. **+ New Resource**.
 2. Choose **Public Repository** (or **Private Repository** if using the GitHub App).
-3. Paste the team's fork URL (e.g. `https://github.com/<org>/team1-doc-project`).
+3. Paste the team's fork URL (e.g. `https://github.com/<org>/<team-name>-doc-project`).
 4. **Branch:** `main`.
 5. **Build Pack:** **Docker Compose**.
 6. **Docker Compose Location:** `docker-compose.prod.yaml`.
 
-### Step 2 — Configure domains
+### Step 3 — Configure domains
 
 In the resource's **Configuration → Network / Domains** panel, set per-service domains:
 
-| Service | Domain                                      | Port | Required? |
-| ------- | ------------------------------------------- | ---- | --------- |
-| `app`   | `https://team{N}.neu-in-leuven.cloud`         | 8501 | yes       |
-| `api`   | `https://team{N}-api.neu-in-leuven.cloud`     | 4000 | optional  |
-| `db`    | —                                           | —    | never     |
+| Service | Domain                                         | Port | Required? |
+| ------- | ---------------------------------------------- | ---- | --------- |
+| `app`   | `https://<team-name>.neu-in-leuven.cloud`        | 8501 | yes       |
+| `api`   | `https://<team-name>-api.neu-in-leuven.cloud`    | 4000 | optional  |
+| `db`    | —                                              | —    | never     |
 
 Coolify auto-provisions Let's Encrypt certificates for each domain on first hit.
 
-> **If the deployed URL returns 404 with no HTTPS:** Coolify's Traefik doesn't know which container port to route to. In some Coolify versions you need to include the container port directly in the domain field, e.g. `https://team{N}.neu-in-leuven.cloud:8501` (the `:8501` is the *container* port; the public port stays 443). Confirm the domain is attached to the correct service (`app`), not the resource as a whole or another service.
+> **If the deployed URL returns 404 with no HTTPS:** Coolify's Traefik doesn't know which container port to route to. In some Coolify versions you need to include the container port directly in the domain field, e.g. `https://<team-name>.neu-in-leuven.cloud:8501` (the `:8501` is the *container* port; the public port stays 443). Confirm the domain is attached to the correct service (`app`), not the resource as a whole or another service.
 
-### Step 3 — Set environment variables
+### Step 4 — Set environment variables
 
 In **Environment Variables**, add the following. Generate fresh values per team — do not reuse across teams.
 
@@ -94,7 +107,9 @@ In **Environment Variables**, add the following. Generate fresh values per team 
 
 Note: `DB_HOST`, `DB_PORT`, and service hostnames are hardcoded in `docker-compose.prod.yaml`; nothing else to set.
 
-### Step 4 — Enable auto-deploy and deploy
+If team members shouldn't be able to read these secrets, double-check that the role assigned in Step 1 doesn't include "view environment variables" — Coolify roles can be tightened per team.
+
+### Step 5 — Enable auto-deploy and deploy
 
 1. Find the auto-deploy setting (labelled something like **Auto Deploy** or **Automatic Deployment**; exact location varies by Coolify version — usually on the resource's main config tab or a "Webhooks" tab) and turn it on. Coolify registers a webhook on the team's fork.
 2. Click **Deploy**.
@@ -111,12 +126,13 @@ First deploy takes ~3–5 minutes (image build + MySQL init from `database-files
 
 After the first deploy completes:
 
-- [ ] `https://team{N}.neu-in-leuven.cloud` loads the Streamlit Home page.
+- [ ] `https://<team-name>.neu-in-leuven.cloud` loads the Streamlit Home page.
 - [ ] Browser shows a valid Let's Encrypt cert (lock icon, no warning).
 - [ ] Streamlit pages that hit the API (e.g. **NGO Directory**, **API Test**) load data without errors. (This proves app ↔ api ↔ db all work over the internal network.)
 - [ ] In Coolify's **Logs** view for the `db` container, the lines `Initializing database files`, `running /docker-entrypoint-initdb.d/ngo_db.sql`, and `MySQL init process done` are all present. If init didn't run, the database will appear empty in the UI.
-- [ ] If you exposed the API publicly: `curl https://team{N}-api.neu-in-leuven.cloud/data` returns JSON.
+- [ ] If you exposed the API publicly: `curl https://<team-name>-api.neu-in-leuven.cloud/data` returns JSON.
 - [ ] Push a trivial commit to the team's `main` — Coolify should rebuild and redeploy within ~1–3 min.
+- [ ] A student on the team can log in to `coolify.cs4535.cloud`, see only their team's resource, and view logs.
 
 ---
 
@@ -124,8 +140,10 @@ After the first deploy completes:
 
 For each team in Coolify:
 
-1. **Resource → Settings → Stop** to stop containers.
-2. **Resource → Settings → Delete** to remove the project and reclaim the disk volume.
+1. Switch into the team's context.
+2. **Resource → Settings → Stop** to stop containers.
+3. **Resource → Settings → Delete** to remove the project and reclaim resources.
+4. **Team → Settings → Delete Team** (or remove members) once the resource is gone.
 
 Optionally archive each team's GitHub fork separately.
 
@@ -133,12 +151,13 @@ Optionally archive each team's GitHub fork separately.
 
 ## Troubleshooting
 
-- **404 / "page not found" on the deployed URL, no HTTPS:** Traefik is up but can't route to the app. Most common cause: the domain isn't bound to the `app` service at port 8501. Edit the domain field for the `app` service to `https://team{N}.neu-in-leuven.cloud:8501` (the `:8501` is the container port). See Step 2 above.
+- **404 / "page not found" on the deployed URL, no HTTPS:** Traefik is up but can't route to the app. Most common cause: the domain isn't bound to the `app` service at port 8501. Edit the domain field for the `app` service to `https://<team-name>.neu-in-leuven.cloud:8501` (the `:8501` is the container port). See Step 3 above.
 - **MySQL init didn't run / database appears empty:** check the `db` container logs for the line `running /docker-entrypoint-initdb.d/ngo_db.sql`. If absent, init didn't execute — almost always because something is mounting a volume at `/var/lib/mysql` that already has data (defeating the tmpfs). The compose ships with the right config; if you've edited it, check the `tmpfs` declaration on the `db` service.
 - **MySQL init errors:** check the `db` container logs for SQL syntax errors in the seed files. Fix in the repo and push; the next deploy reseeds automatically (no manual volume cleanup).
 - **Streamlit can't reach the API:** confirm the `api` service is healthy in Coolify logs. Streamlit pages call `http://web-api:4000` internally — that hostname is set via the `hostname: web-api` line in `docker-compose.prod.yaml`. If logs show DNS errors for `web-api`, that line was modified.
-- **Cert provisioning fails:** confirm the team's domain resolves (`dig team{N}.neu-in-leuven.cloud`) before retrying. Let's Encrypt rate-limits failed validations (5/hour/hostname) and overall issuance (50/week per registered domain) — see notes below.
+- **Cert provisioning fails:** confirm the team's domain resolves (`dig <team-name>.neu-in-leuven.cloud`) before retrying. Let's Encrypt rate-limits failed validations (5/hour/hostname) and overall issuance (50/week per registered domain) — see notes below.
 - **Auto-deploy isn't triggering:** check the GitHub repo's **Settings → Webhooks** for the Coolify webhook and recent delivery status. Either reinstall the Coolify GitHub App on the repo or toggle Auto Deploy off and back on to re-register the webhook.
+- **Student can't see the resource after invite:** confirm they accepted the team invite and are switched into the right team in Coolify's team-switcher. Members default to their personal/default team on login; the course team has to be selected explicitly.
 
 ### Let's Encrypt rate limits — won't bite under normal use
 

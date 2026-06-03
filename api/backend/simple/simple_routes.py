@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, current_app, redirect, url_for
 from backend.simple.playlist import sample_playlist_data
-from backend.ml_models import model01
+from backend.ml_models import model01, model02
 
 # This blueprint handles basic routes useful for testing and demonstration
 simple_routes = Blueprint("simple_routes", __name__)
@@ -52,6 +52,8 @@ def get_data():
     return jsonify(data), 200
 
 
+# ------------------------------------------------------------
+# model01 prediction route (not quite as nice as model02, but a basic demo)
 @simple_routes.route("/prediction/<var_01>/<var_02>", methods=["GET"])
 def get_prediction(var_01, var_02):
     current_app.logger.info("GET /prediction handler")
@@ -67,3 +69,52 @@ def get_prediction(var_01, var_02):
     except Exception as e:
         current_app.logger.error(f"Prediction error: {e}")
         return jsonify({"error": "Error processing prediction request"}), 500
+
+# ------------------------------------------------------------
+# model02 — single prediction
+# URL:  GET /model2/prediction/<fossil_fuels>/<co2_upop>
+# e.g.  /model2/prediction/74.5/0.0105
+#
+# Returns the predicted Belgium GDP per capita given the two inputs.
+# The route passes raw strings to model02.predict(), which handles
+# scaling, float conversion and raises ValueError on bad input.
+# ------------------------------------------------------------
+@simple_routes.route("/model2/prediction/<fossil_fuels>/<co2_upop>", methods=["GET"])
+def get_model2_prediction(fossil_fuels, co2_upop):
+    current_app.logger.info("GET /model2/prediction handler")
+    try:
+        prediction = model02.predict(fossil_fuels, co2_upop)
+        current_app.logger.info(f"model02 prediction: {prediction:.2f}")
+        return jsonify({
+            "prediction":      round(prediction, 2),
+            "input_variables": {
+                "Fossil_Fuels": float(fossil_fuels),
+                "CO2_Upop":     float(co2_upop),
+            },
+        }), 200
+    except ValueError as e:
+        current_app.logger.error(f"model02 input error: {e}")
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        current_app.logger.error(f"model02 prediction error: {e}")
+        return jsonify({"error": "Error processing prediction request"}), 500
+
+
+# ------------------------------------------------------------
+# model02 — full observation set with predictions
+# URL:  GET /model2/observations
+#
+# Returns the complete Belgium dataset (all 26 years) with a
+# model-predicted GDP column added.  Used by the scatter plot
+# on the admin ML page (22_Prettier_ML.py).
+# ------------------------------------------------------------
+@simple_routes.route("/model2/observations", methods=["GET"])
+def get_model2_observations():
+    current_app.logger.info("GET /model2/observations handler")
+    try:
+        data = model02.get_observations_with_predictions()
+        current_app.logger.info(f"Returning {len(data)} observation rows")
+        return jsonify(data), 200
+    except Exception as e:
+        current_app.logger.error(f"model02 observations error: {e}")
+        return jsonify({"error": "Error fetching observations"}), 500

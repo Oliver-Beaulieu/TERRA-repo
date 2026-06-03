@@ -47,4 +47,4 @@ def predict(var01, var02):
 
     # Prepend 1.0 as the intercept term, then dot with the parameter vector
     input_array = np.array([1.0, x1, x2])
-    return np.dot(params_array, input_array)
+    return float(params_array.T @ input_array)

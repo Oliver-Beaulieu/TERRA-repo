@@ -3,6 +3,7 @@
 # This file has functions to add links to the left sidebar based on the user's role.
 
 import streamlit as st
+from pathlib import Path
 
 
 # ---- General ----------------------------------------------------------------
@@ -90,7 +91,8 @@ def SideBarLinks(show_home=False):
     """
 
     # Logo appears at the top of the sidebar on every page
-    st.sidebar.image("assets/logo.png", width=150)
+    logo_path = Path(__file__).parent.parent / "assets" / "logo.png"
+    st.sidebar.image(str(logo_path), width=150)
 
     # If no one is logged in, send them to the Home (login) page
     if "authenticated" not in st.session_state:

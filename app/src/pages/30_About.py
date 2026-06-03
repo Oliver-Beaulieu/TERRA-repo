@@ -58,4 +58,4 @@ with c2:
     st.caption("Computer Science.")
 
 st.divider()
-st.caption("Summer 2026 · Data and Software in International Government and Politics Dialogue of Civilizations · KU Leuven, Belgium")
+st.caption("Summer 2026 · Data and Software in International Government and Politics Dialogue of Civilizations · Northeastern University")

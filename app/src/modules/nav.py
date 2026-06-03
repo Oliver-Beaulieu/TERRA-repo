@@ -13,58 +13,105 @@ def home_nav():
 
 
 def about_page_nav():
-    st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
+    st.sidebar.page_link("pages/30_About.py", label="About TERRA", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: pol_analyst ------------------------------------------------
 
-def pol_strat_home_nav():
+def policy_analyst_home_nav():
     st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
+        "pages/00_Policy_Analyst_Home.py", label="Gabriel Home", icon="🏠"
     )
 
 
-def world_bank_viz_nav():
+def compare_countries_nav():
     st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
+        "pages/03_Compare_Countries.py", label="Compare Countries", icon="📊"
     )
-
-
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
-
-
-# ---- Role: usaid_worker -----------------------------------------------------
-
-def usaid_worker_home_nav():
-    st.sidebar.page_link(
-        "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
-    )
-
-
-def ngo_directory_nav():
-    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
-
-
-def add_ngo_nav():
-    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
-
-
-def prediction_nav():
-    st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
-
-
-def api_test_nav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
 
 
 def classification_nav():
     st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
+        "pages/13_Classification.py", label="Risk Classification", icon="🗺️"
     )
 
+
+def prediction_nav():
+    st.sidebar.page_link(
+        "pages/11_Prediction.py", label="Prediction Model", icon="📈"
+    )
+
+
+def export_reports_nav():
+    st.sidebar.page_link(
+        "pages/04_Export_Reports.py", label="Export / Reports", icon="⬇"
+    )
+
+
+
+# ---- Role: humanitarian_coordinator -----------------------------------------------------
+
+def humanitarian_coordinator_home_nav():
+    st.sidebar.page_link(
+        "pages/01_Humanitarian_Coordinator_Home.py", label="Diana Home", icon="🏠"
+    )
+
+
+def risk_map_nav():
+    st.sidebar.page_link("pages/02_Map_Demo.py", label="Risk Map", icon="🗺️")
+
+
+def priority_countries_nav():
+    st.sidebar.page_link(
+        "pages/05_Priority_Countries.py", label="Priority Countries", icon="🚨"
+    )
+
+
+def ngo_directory_nav():
+    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="🏢")
+
+
+def add_ngo_nav():
+    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add NGO", icon="➕")
+
+
+def ngo_profile_nav():
+    st.sidebar.page_link("pages/16_NGO_Profile.py", label="NGO Profile", icon="👥")
+
+
+def export_country_summary_nav():
+    st.sidebar.page_link(
+        "pages/06_Export_Country_Summary.py", label="Export Country Summary", icon="⬇"
+    )
+
+# ---- Role: student_user ------------------------------------------------------
+
+def student_home_nav():
+    st.sidebar.page_link(
+        "pages/02_Student_Home.py", label="Mohammed Home", icon="🏠"
+    )
+
+
+def explore_risk_map_nav():
+    st.sidebar.page_link("pages/02_Map_Demo.py", label="Explore Risk Map", icon="🗺️")
+
+
+def climate_events_nav():
+    st.sidebar.page_link(
+        "pages/07_Climate_Events.py", label="Climate Events", icon="🌡️"
+    )
+
+
+def displacement_timeline_nav():
+    st.sidebar.page_link(
+        "pages/08_Displacement_Timeline.py", label="Displacement Timeline", icon="📈"
+    )
+
+
+def similar_countries_nav():
+    st.sidebar.page_link(
+        "pages/09_Similar_Countries.py", label="Similar Countries", icon="🔍"
+    )
 
 # ---- Role: administrator ----------------------------------------------------
 
@@ -104,18 +151,28 @@ def SideBarLinks(show_home=False):
 
     if st.session_state["authenticated"]:
 
-        if st.session_state["role"] == "pol_strat_advisor":
-            pol_strat_home_nav()
-            world_bank_viz_nav()
-            map_demo_nav()
+        if st.session_state["role"] == "policy_analyst":
+            policy_analyst_home_nav()
+            compare_countries_nav()
+            classification_nav()
+            prediction_nav()
+            export_reports_nav()
 
-        if st.session_state["role"] == "usaid_worker":
-            usaid_worker_home_nav()
+        if st.session_state["role"] == "humanitarian_coordinator":
+            humanitarian_coordinator_home_nav()
+            risk_map_nav()
+            priority_countries_nav()
             ngo_directory_nav()
             add_ngo_nav()
-            prediction_nav()
-            api_test_nav()
-            classification_nav()
+            ngo_profile_nav()
+            export_country_summary_nav()
+
+        if st.session_state["role"] == "student_user":
+            student_home_nav()
+            explore_risk_map_nav()
+            climate_events_nav()
+            displacement_timeline_nav()
+            similar_countries_nav()
 
         if st.session_state["role"] == "administrator":
             admin_home_nav()

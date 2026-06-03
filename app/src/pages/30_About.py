@@ -1,23 +1,61 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import streamlit as st
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
-
 SideBarLinks()
 
-st.write("# About this App")
+st.title("About TERRA")
 
-st.markdown(
-    """
-    This is a demo app for Data and Software in International Government and Politics Dialogue 2025 Project Course.  
-
-    The goal of this demo is to provide information on the tech stack 
-    being used as well as demo some of the features of the various platforms. 
-
-    Stay tuned for more information and features to come!
-    """
+st.write(
+    "**TERRA — Tracking European Climate Risk & Refugee Asylum** is an application "
+    "which helps explore how climate change and human displacement are connected "
+    "by looking at the 27 member states of the European Union. Climate change is a real and "
+    "is a present threat, from rising sea levels and high temperatures to wildfires and "
+    "flooding, it's forcing people to move from their homes. Yet no tool brings together "
+    "climate disasters and the displacement data they drive. TERRA was built to fill this gap. "
 )
 
-# Add a button to return to home page
-if st.button("Return to Home", type="primary"):
-    st.switch_page("Home.py")
+st.divider()
+st.subheader("What the App Does")
+st.write(
+    "TERRA combines climate indicators, disaster records, and asylum "
+    "statistics from public international datasets. Users can explore maps, "
+    "compare countries, look into individual nations, and track how displacement trends "
+    "have evolved over time. Machine learning models help classify climate displacement "
+    "risk levels and surface countries facing similar pressures."
+)
+
+st.subheader("Our Goals")
+st.write(
+    "- Makes it easier to understand the relationship between climate events and displacement\n"
+    "- Supports better decisions about where humanitarian attention and resources are needed\n"
+)
+
+st.subheader("Who It's For")
+st.write(
+    "TERRA is built around three users, a policy analyst reviewing country trends to "
+    "inform EU policy, a humanitarian coordinator that determines where to give support, "
+    "and a climate-displaced student looking to understand regions affected like their own."
+)
+
+st.divider()
+st.subheader("The Team")
+st.write("TERRA was built by four Computer Science students at Northeastern University:")
+
+c1, c2 = st.columns(2)
+with c1:
+    st.markdown("**Yadiel Cruz**")
+    st.caption("Computer Science & Economics.")
+    st.markdown("**Hamza Chakir**")
+    st.caption("Second-year CS student.")
+with c2:
+    st.markdown("**Oliver Beaulieu**")
+    st.caption("Computer Science & Cognitive Psychology.")
+    st.markdown("**James Chan**")
+    st.caption("Computer Science.")
+
+st.divider()
+st.caption("Summer 2026 · Data and Software in International Government and Politics Dialogue of Civilizations · KU Leuven, Belgium")

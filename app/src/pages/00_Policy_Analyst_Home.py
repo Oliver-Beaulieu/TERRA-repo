@@ -65,4 +65,7 @@ with button_col2:
                  use_container_width=True):
         st.switch_page("pages/02_Map_Demo.py")
 
-
+if st.button('Saved views — your stored comparisons',
+             type='primary',
+             use_container_width=True):
+    st.switch_page('pages/10_Saved_Views.py')

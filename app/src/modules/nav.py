@@ -47,6 +47,11 @@ def export_reports_nav():
         "pages/04_Export_Reports.py", label="Export / Reports", icon="⬇"
     )
 
+def saved_views_nav():
+    st.sidebar.page_link(
+        "pages/10_Saved_Views.py", label="Saved Views", icon="💾"
+    )
+
 
 
 # ---- Role: humanitarian_coordinator -----------------------------------------------------
@@ -138,7 +143,7 @@ def SideBarLinks(show_home=False):
     """
 
     # Logo appears at the top of the sidebar on every page
-    logo_path = Path(__file__).parent.parent / "assets" / "logo.png"
+    logo_path = Path(__file__).parent.parent / "assets" / "TerraLo.png"
     st.sidebar.image(str(logo_path), width=150)
 
     # If no one is logged in, send them to the Home (login) page
@@ -156,6 +161,7 @@ def SideBarLinks(show_home=False):
             compare_countries_nav()
             classification_nav()
             prediction_nav()
+            saved_views_nav()
             export_reports_nav()
 
         if st.session_state["role"] == "humanitarian_coordinator":

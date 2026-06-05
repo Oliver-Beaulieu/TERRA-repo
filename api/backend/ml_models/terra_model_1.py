@@ -32,7 +32,6 @@ TRAIN_MAX_YEAR = 2018
 # Start of testing year
 TEST_MIN_YEAR = 2019
 
-# Numeric features used by the model (without lag feature yet).
 NUMERIC_FEATURES = [
     "year",
     "gdp_per_capita",
@@ -93,7 +92,8 @@ def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    model = LinearRegression()
+    model = LinearRegression(n_estimators=300, learning_rate=0.05,
+                                      max_depth=4, random_state=42)
     model.fit(X_train_scaled, y_train)
     y_pred = model.predict(X_test_scaled)
 
@@ -121,15 +121,15 @@ def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
     print(results.sort_values("error", key=abs, ascending=False).head(15))
 
     # Preserve artifacts so we don't need to retrain
-    artifacts = {"model": model, "scaler": scaler, "features": features}
+    artifacts = {
+        "model": model,
+        "scaler": scaler,
+        "features": features,
+        "metrics": {"mse_log": mse_log, "r2_log": r2_log, "mae_orig": mae_orig},
+    }
     joblib.dump(artifacts, model_path)
     print(f"\nSaved model artifact to {model_path}")
 
-    artifacts["metrics"] = {
-        "mse_log": mse_log,
-        "r2_log": r2_log,
-        "mae_orig": mae_orig,
-    }
     return artifacts
 
 def load_artifacts(model_path=MODEL_PATH):

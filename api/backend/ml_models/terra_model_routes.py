@@ -1,8 +1,27 @@
 from flask import Blueprint, jsonify, request, current_app
 
-from backend.ml_models.terra_model_1 import predict
+from backend.ml_models.terra_model_1 import predict, train_test_model, store_params_in_db
 
 terra_model_bp = Blueprint("terra_model", __name__)
+
+
+# Retrain TERRA Model 1 and store the new parameters in the database.
+# Example: POST /model1/train  (admin "Train Model 1" action)
+@terra_model_bp.route("/model1/train", methods=["POST"])
+def train_model1():
+    current_app.logger.info("POST /model1/train")
+    try:
+        artifacts = train_test_model()
+        seq = store_params_in_db(artifacts)
+        return jsonify({
+            "model": "TERRA Model 1 Linear Regression",
+            "message": "Model retrained and parameters stored in the database.",
+            "version": seq,
+            "metrics": artifacts["metrics"],
+        }), 200
+    except Exception as e:
+        current_app.logger.error(f"Training error: {e}")
+        return jsonify({"error": "Training failed", "message": str(e)}), 500
 
 
 # Predict asylum applications using TERRA Model 1
@@ -14,19 +33,17 @@ def predict_asylum_applications():
     try:
         data = request.get_json()
 
+        # Must match terra_model_1.NUMERIC_FEATURES (+ country_code). `year`,
+        # population, urban_pct, precip_total, evapotrans_total were dropped
+        # during model tuning and are intentionally no longer required.
         required_fields = [
             "country_code",
-            "year",
             "gdp_per_capita",
             "unemployment_rate",
-            "population",
-            "urban_pct",
             "temp_mean",
             "heatwave_days",
-            "precip_total",
             "precip_days_heavy",
             "dry_days",
-            "evapotrans_total",
         ]
 
         missing_fields = []

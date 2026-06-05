@@ -12,17 +12,28 @@ SideBarLinks()
 st.title('App Administration Page')
 
 st.write('## Model 1 Maintenance')
+st.caption(
+    "TERRA Model 1 predicts asylum applications. Its parameters are stored in "
+    "the database (model1_params / model1_scaler); retraining refits the model "
+    "and writes a new parameter version."
+)
 
-if st.button("Train Model 01", type='primary', use_container_width=True):
-    # TODO: wire this to a POST /train route on the API that triggers retraining
-    st.info("Training route not yet implemented.")
+if st.button("Retrain Model 1", type='primary', use_container_width=True):
+    with st.spinner("Retraining and storing parameters in the database..."):
+        try:
+            resp = requests.post('http://web-api:4000/model1/train')
+            resp.raise_for_status()
+            result = resp.json()
+            st.success(
+                f"Model retrained and stored as version {result['version']}."
+            )
+            m = result["metrics"]
+            c1, c2, c3 = st.columns(3)
+            c1.metric("R² (log scale)", f"{m['r2_log']:.3f}")
+            c2.metric("MSE (log scale)", f"{m['mse_log']:.3f}")
+            c3.metric("MAE (applications)", f"{m['mae_orig']:,.0f}")
+        except Exception as e:
+            st.error(f"Retraining failed: {e}")
 
-if st.button('Test Model 01', type='primary', use_container_width=True):
-    # TODO: wire this to a GET /test route on the API
-    st.info("Testing route not yet implemented.")
-
-if st.button('Model 1 - get predicted value for 10, 25',
-             type='primary',
-             use_container_width=True):
-    results = requests.get('http://web-api:4000/prediction/10/25').json()
-    st.dataframe(results)
+st.divider()
+st.write("To make a prediction, use the **Asylum Applications Prediction** page.")

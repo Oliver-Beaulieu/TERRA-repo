@@ -91,10 +91,10 @@ if st.button('Act as Mohammed, a Climate-Displaced Student',
              type='primary',
              use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'administrator'
+    st.session_state['role'] = 'student_user'
     st.session_state['first_name'] = 'Mohammed'
     logger.info("Logging in as Mohammed Student Persona")
-    st.switch_page('pages/02_Map_Demo.py')
+    st.switch_page('pages/20_Mohammed_Home.py')
 
 
 

@@ -92,7 +92,8 @@ def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    model = LinearRegression()
+    model = LinearRegression(n_estimators=300, learning_rate=0.05,
+                                      max_depth=4, random_state=42)
     model.fit(X_train_scaled, y_train)
     y_pred = model.predict(X_test_scaled)
 

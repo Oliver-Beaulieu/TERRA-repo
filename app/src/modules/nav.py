@@ -93,7 +93,7 @@ def export_country_summary_nav():
 
 def student_home_nav():
     st.sidebar.page_link(
-        "pages/02_Student_Home.py", label="Mohammed Home", icon="🏠"
+        "pages/20_Mohammed_Home.py", label="Mohammed Home", icon="🏠"
     )
 
 

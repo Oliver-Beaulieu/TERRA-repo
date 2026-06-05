@@ -29,18 +29,20 @@ TRAIN_MAX_YEAR = 2018
 TEST_MIN_YEAR = 2019
 
 # Numeric features used by the model (without lag feature yet).
+# NOTE: raw calendar `year` is deliberately NOT a model feature. The scaler is
+# fit on 2010-2018 only, so feeding a future year (the webapp defaults to 2024)
+# pushes it far outside the training range and the positive time-trend coef
+# inflates predictions several-fold. `year` is still used to split train/test.
+# Features dropped via iterative VIF (multicollinearity):
+#   - precip_total / evapotrans_total: redundant with other climate aggregates.
+#   - population / urban_pct: collinear with country identity (country dummies).
 NUMERIC_FEATURES = [
-    "year",
     "gdp_per_capita",
     "unemployment_rate",
-    "population",
-    "urban_pct",
     "temp_mean",
     "heatwave_days",
-    "precip_total",
     "precip_days_heavy",
     "dry_days",
-    "evapotrans_total",
 ]
 
 def load_data(path=DATA_PATH):

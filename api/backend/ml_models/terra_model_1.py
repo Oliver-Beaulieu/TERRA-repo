@@ -4,11 +4,19 @@
 Predicts asylum applications from climate and economic features.
 Trained on 2010-2018 data, tested on 2019-2023 data.
 
-Exposes training/testing via train_test_model() and real-time
-prediction via predict(), which the REST API calls directly.
+DB-served pattern (same as model02): the fitted parameters live in the
+database, not in code or a binary artifact:
+  - model1_params : feature_names + beta_vals ([intercept, *coefs])
+  - model1_scaler : feature_means + feature_stds (StandardScaler params)
+
+predict() reads those at request time and reconstructs the prediction. To
+retrain, call train_test_model() to refit, then store_params_in_db() to write
+the new parameters (the admin "Train" route does exactly this). The joblib
+dump in train_test_model() is kept only as an offline evaluation artifact.
 """
 
 import os
+import json
 import joblib
 import numpy as np
 import pandas as pd
@@ -32,18 +40,24 @@ TRAIN_MAX_YEAR = 2018
 # Start of testing year
 TEST_MIN_YEAR = 2019
 
+# NOTE: raw calendar `year` is deliberately NOT a model feature. The scaler is
+# fit on 2010-2018 only, so feeding a future year (the webapp defaults to 2024)
+# pushes it far outside the training range and the positive time-trend coef
+# inflates predictions several-fold. `year` is still used to split train/test.
+#
+# Features dropped via iterative VIF (multicollinearity):
+#   - precip_total (VIF 23.6) and evapotrans_total (VIF 13.2): redundant with
+#     the other climate aggregates.
+#   - population (VIF ~7986) and urban_pct (VIF ~338): collinear with country
+#     identity (the country_code dummies). Dropping them tamed the worst
+#     coefficient from 7.66 to 1.38 and improved test MAE.
 NUMERIC_FEATURES = [
-    "year",
     "gdp_per_capita",
     "unemployment_rate",
-    "population",
-    "urban_pct",
     "temp_mean",
     "heatwave_days",
-    "precip_total",
     "precip_days_heavy",
     "dry_days",
-    "evapotrans_total",
 ]
 
 def load_data(path=DATA_PATH):
@@ -92,8 +106,7 @@ def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    model = LinearRegression(n_estimators=300, learning_rate=0.05,
-                                      max_depth=4, random_state=42)
+    model = LinearRegression()
     model.fit(X_train_scaled, y_train)
     y_pred = model.predict(X_test_scaled)
 
@@ -132,34 +145,88 @@ def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
 
     return artifacts
 
-def load_artifacts(model_path=MODEL_PATH):
-    """Load the persisted model/scaler/features, training first if missing."""
-    if not os.path.exists(model_path):
-        print("No saved model found - training one first...\n")
-        return train_test_model(model_path=model_path)
-    return joblib.load(model_path)
+def store_params_in_db(artifacts, db=None):
+    """Persist a fitted model's parameters into model1_params / model1_scaler.
 
-
-def predict(user_inputs, model=None, scaler=None, features=None,
-            model_path=MODEL_PATH):
-    """Predict asylum applications for a single country/year.
-    The model and scaler can be passed directly, or loaded from disk.
+    Writes a new versioned row (sequence_number = max + 1) so predict() picks
+    up the latest. Called by the admin retrain route after train_test_model().
     """
-    if model is None or scaler is None or features is None:
-        artifacts = load_artifacts(model_path)
-        model = artifacts["model"]
-        scaler = artifacts["scaler"]
-        features = artifacts["features"]
+    from backend.db_connection import get_db
+    if db is None:
+        db = get_db()
 
+    model, scaler, features = artifacts["model"], artifacts["scaler"], artifacts["features"]
+    feature_names = json.dumps(list(features))
+    beta_vals = json.dumps([float(model.intercept_)] + [float(c) for c in model.coef_])
+    feature_means = json.dumps([float(x) for x in scaler.mean_])
+    feature_stds = json.dumps([float(x) for x in scaler.scale_])
+
+    cursor = db.cursor()
+    cursor.execute("SELECT COALESCE(MAX(sequence_number), 0) + 1 FROM model1_params")
+    seq = cursor.fetchone()[0]
+    cursor.execute(
+        "INSERT INTO model1_params (sequence_number, feature_names, beta_vals) "
+        "VALUES (%s, %s, %s)",
+        (seq, feature_names, beta_vals),
+    )
+    cursor.execute(
+        "INSERT INTO model1_scaler (sequence_number, feature_means, feature_stds) "
+        "VALUES (%s, %s, %s)",
+        (seq, feature_means, feature_stds),
+    )
+    db.commit()
+    cursor.close()
+    return seq
+
+
+def _load_db_params():
+    """Fetch the latest beta vector + scaler params from the database."""
+    from backend.db_connection import get_db
+    db = get_db()
+    with db.cursor(dictionary=True) as cursor:
+        cursor.execute(
+            "SELECT feature_names, beta_vals FROM model1_params "
+            "ORDER BY sequence_number DESC LIMIT 1"
+        )
+        params_row = cursor.fetchone()
+        if params_row is None:
+            raise ValueError("No model1 parameters found in the database.")
+
+        cursor.execute(
+            "SELECT feature_means, feature_stds FROM model1_scaler "
+            "ORDER BY sequence_number DESC LIMIT 1"
+        )
+        scaler_row = cursor.fetchone()
+        if scaler_row is None:
+            raise ValueError("No model1 scaler parameters found in the database.")
+
+    feature_names = json.loads(params_row["feature_names"])
+    beta = np.array(json.loads(params_row["beta_vals"]), dtype=float)
+    means = np.array(json.loads(scaler_row["feature_means"]), dtype=float)
+    stds = np.array(json.loads(scaler_row["feature_stds"]), dtype=float)
+    return feature_names, beta, means, stds
+
+
+def predict(user_inputs):
+    """Predict asylum applications for a single country.
+
+    Reads the fitted parameters from the database (model1_params /
+    model1_scaler), reconstructs the standardized feature row, and applies
+    log_pred = intercept + scaled_features . coefs, then expm1.
+    """
+    feature_names, beta, means, stds = _load_db_params()
+
+    # Build the raw feature row and align it to the stored feature order.
+    # Country becomes one-hot columns; the reference country (dropped at train
+    # time) and any features the model no longer uses fall away on reindex.
     row = pd.DataFrame([user_inputs])
     row = pd.get_dummies(row, columns=["country_code"])
+    row = row.reindex(columns=feature_names, fill_value=0)
 
-    row = row.reindex(columns=features, fill_value=0)
-
-    row_scaled = scaler.transform(row)
-    log_prediction = model.predict(row_scaled)
-    prediction = np.expm1(log_prediction)
-    return float(prediction[0])
+    x = row.iloc[0].to_numpy(dtype=float)
+    x_scaled = (x - means) / stds
+    log_prediction = beta[0] + x_scaled @ beta[1:]
+    return float(np.expm1(log_prediction))
 
 
 if __name__ == "__main__":

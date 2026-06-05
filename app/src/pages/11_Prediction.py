@@ -18,7 +18,13 @@ st.write(
 
 st.divider()
 
-st.subheader("Enter country-year information")
+st.subheader("Enter country information")
+st.caption(
+    "The model predicts from a country's economic and climate indicators. "
+    "It does not use calendar year, population, urbanization, total "
+    "precipitation, or evapotranspiration — those were removed during model "
+    "tuning (multicollinearity / out-of-range extrapolation)."
+)
 
 col1, col2, col3 = st.columns(3)
 
@@ -29,8 +35,6 @@ with col1:
          "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
          "PT", "RO", "SE", "SI", "SK"]
     )
-
-    year = st.number_input("Year", min_value=2010, max_value=2030, value=2024)
 
     gdp_per_capita = st.number_input(
         "GDP per Capita",
@@ -46,19 +50,6 @@ with col1:
     )
 
 with col2:
-    population = st.number_input(
-        "Population",
-        min_value=0,
-        value=11700000
-    )
-
-    urban_pct = st.number_input(
-        "Urban Population %",
-        min_value=0.0,
-        max_value=100.0,
-        value=87.5
-    )
-
     temp_mean = st.number_input(
         "Average Temperature",
         value=12.0
@@ -71,12 +62,6 @@ with col2:
     )
 
 with col3:
-    precip_total = st.number_input(
-        "Total Precipitation",
-        min_value=0.0,
-        value=800.0
-    )
-
     precip_days_heavy = st.number_input(
         "Heavy Precipitation Days",
         min_value=0,
@@ -89,29 +74,18 @@ with col3:
         value=220
     )
 
-    evapotrans_total = st.number_input(
-        "Evapotranspiration Total",
-        min_value=0.0,
-        value=780.0
-    )
-
 st.divider()
 
 if st.button("Predict Asylum Applications", type="primary", use_container_width=True):
 
     user_inputs = {
         "country_code": country_code,
-        "year": year,
         "gdp_per_capita": gdp_per_capita,
         "unemployment_rate": unemployment_rate,
-        "population": population,
-        "urban_pct": urban_pct,
         "temp_mean": temp_mean,
         "heatwave_days": heatwave_days,
-        "precip_total": precip_total,
         "precip_days_heavy": precip_days_heavy,
         "dry_days": dry_days,
-        "evapotrans_total": evapotrans_total,
     }
 
     # Use web-api when running in Docker.

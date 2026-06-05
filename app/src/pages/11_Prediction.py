@@ -1,33 +1,143 @@
 import logging
-
 logger = logging.getLogger(__name__)
 
+import requests
 import streamlit as st
 from modules.nav import SideBarLinks
-import requests
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout='wide')
 
-# Display the appropriate sidebar links for the role of the logged in user
+# Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
 
-st.title("Prediction with Regression")
+st.title("Asylum Applications Prediction Model")
+st.write(
+    "This page uses TERRA's first machine learning model to predict asylum "
+    "applications based on climate and economic indicators."
+)
 
-# create a 2 column layout
-col1, col2 = st.columns(2)
+st.divider()
 
-# add one number input for variable 1 into column 1
+st.subheader("Enter country-year information")
+
+col1, col2, col3 = st.columns(3)
+
 with col1:
-    var_01 = st.number_input("Variable 01:", step=1)
+    country_code = st.selectbox(
+        "Country Code",
+        ["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR",
+         "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
+         "PT", "RO", "SE", "SI", "SK"]
+    )
 
-# add another number input for variable 2 into column 2
+    year = st.number_input("Year", min_value=2010, max_value=2030, value=2024)
+
+    gdp_per_capita = st.number_input(
+        "GDP per Capita",
+        min_value=0.0,
+        value=55000.0
+    )
+
+    unemployment_rate = st.number_input(
+        "Unemployment Rate",
+        min_value=0.0,
+        max_value=100.0,
+        value=5.5
+    )
+
 with col2:
-    var_02 = st.number_input("Variable 02:", step=1)
+    population = st.number_input(
+        "Population",
+        min_value=0,
+        value=11700000
+    )
 
-# add a button to use the values entered into the number field to send to the
-# prediction function via the REST API
-if st.button("Calculate Prediction", type="primary", use_container_width=True):
-    logger.info(f"var_01 = {var_01}, var_02 = {var_02}")
-    results = requests.get(f"http://web-api:4000/prediction/{var_01}/{var_02}")
-    json_results = results.json()
-    st.dataframe(json_results)
+    urban_pct = st.number_input(
+        "Urban Population %",
+        min_value=0.0,
+        max_value=100.0,
+        value=87.5
+    )
+
+    temp_mean = st.number_input(
+        "Average Temperature",
+        value=12.0
+    )
+
+    heatwave_days = st.number_input(
+        "Heatwave Days",
+        min_value=0,
+        value=0
+    )
+
+with col3:
+    precip_total = st.number_input(
+        "Total Precipitation",
+        min_value=0.0,
+        value=800.0
+    )
+
+    precip_days_heavy = st.number_input(
+        "Heavy Precipitation Days",
+        min_value=0,
+        value=3
+    )
+
+    dry_days = st.number_input(
+        "Dry Days",
+        min_value=0,
+        value=220
+    )
+
+    evapotrans_total = st.number_input(
+        "Evapotranspiration Total",
+        min_value=0.0,
+        value=780.0
+    )
+
+st.divider()
+
+if st.button("Predict Asylum Applications", type="primary", use_container_width=True):
+
+    user_inputs = {
+        "country_code": country_code,
+        "year": year,
+        "gdp_per_capita": gdp_per_capita,
+        "unemployment_rate": unemployment_rate,
+        "population": population,
+        "urban_pct": urban_pct,
+        "temp_mean": temp_mean,
+        "heatwave_days": heatwave_days,
+        "precip_total": precip_total,
+        "precip_days_heavy": precip_days_heavy,
+        "dry_days": dry_days,
+        "evapotrans_total": evapotrans_total,
+    }
+
+    # Use web-api when running in Docker.
+    # If running Streamlit locally outside Docker, use localhost instead.
+    api_url = "http://web-api:4000/predict/asylum"
+
+    try:
+        response = requests.post(api_url, json=user_inputs)
+
+        if response.status_code == 200:
+            result = response.json()
+            prediction = result["prediction"]
+
+            st.success("Prediction complete.")
+            st.metric(
+                "Predicted Asylum Applications",
+                f"{prediction:,.0f}"
+            )
+
+            st.write("### Model Inputs Used")
+            st.json(user_inputs)
+
+        else:
+            st.error("The prediction API returned an error.")
+            st.write(response.json())
+
+    except requests.exceptions.RequestException as e:
+        st.error("Could not connect to the prediction API.")
+        st.write(e)

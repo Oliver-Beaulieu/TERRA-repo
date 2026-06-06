@@ -59,5 +59,46 @@ def prepare_data(df):
 
     return X, y, model
 
+def train_test_model(
+    data_path=DATA_PATH,
+    model_path=MODEL_PATH,
+    test_size=0.20,
+    random_state=42,
+    ):
+    """Train model"""
+    df = load_data(data_path)
+    X, y, model = prepare_data(df)
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state)
+    
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
+    r2 = r2_score(y_test, y_pred, multioutput="raw_values")
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred, multioutput="raw_values"))
+    mae = mean_absolute_error(y_test, y_pred, multioutput="raw_values")
+
+    print("\n=== Model Performance ===")
+    print("R²:", r2)
+    print("RMSE:", rmse)
+    print("MAE:", mae)
+
+    artifact = {
+        "model": model,
+        "numeric_features": numeric_features,
+        "categorical_features": categorical_features,
+        "targets": targets,
+        "metrics": {
+            "r2": r2,
+            "rmse": rmse,
+            "mae": mae
+        }
+    }
+    
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    joblib.dump(artifacts, model_path)
+    print(f"\nSaved model artifact to {model_path}")
+
+    return artifacts
 

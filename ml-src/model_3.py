@@ -126,5 +126,6 @@ def predict(user_inputs, model=None, model_path=MODEL_PATH):
         "dry_days_pred": float(preds[2]),
     }
 
+
 if __name__ == "__main__":
     train_test_model()

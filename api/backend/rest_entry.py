@@ -10,6 +10,7 @@ from backend.ngos.ngo_routes import ngo_bp
 from backend.countries.country_routes import country_bp
 from backend.climate.climate_routes import climate_bp
 from backend.risk.risk_routes import risk_bp
+from backend.prediction.prediction_routes import prediction_bp
 from backend.views.view_routes import view_bp
 
 
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(country_bp, url_prefix="/countries")
     app.register_blueprint(climate_bp)
     app.register_blueprint(risk_bp)
+    app.register_blueprint(prediction_bp)
     app.register_blueprint(view_bp)
     app.register_blueprint(terra_model_bp)
 

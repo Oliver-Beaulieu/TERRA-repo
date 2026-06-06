@@ -1,7 +1,9 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import requests
 import streamlit as st
+import pandas as pd
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
@@ -9,40 +11,190 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 st.title("Export Country Summary")
-st.write("### Generate a country-level humanitarian summary")
-
+st.write("### Generate a country-level humanitarian summary using TERRA Model 1")
 st.write(
-    "This page allows you to view a specific countries infoormation and dive deep into it. "
+    "Select a country and year to pull its climate and economic data, "
+    "run it through the asylum applications prediction model, and export a summary."
 )
 
 st.divider()
 
-selected_country = st.selectbox(
-    "Select a country",
-    ["Greece", "Italy", "Spain", "Germany", "France"]
-)
+API_BASE = "http://web-api:4000"
 
-st.subheader(f"{selected_country} Humanitarian Summary")
+# Load all countries from DB
+try:
+    countries_resp = requests.get(f"{API_BASE}/countries")
+    if countries_resp.status_code == 200:
+        countries = countries_resp.json()
+    else:
+        st.error("Could not load countries from the API.")
+        st.stop()
+except requests.exceptions.RequestException as e:
+    st.error(f"Could not connect to the API: {e}")
+    st.stop()
 
-col1, col2, col3 = st.columns(3)
+country_names = [c["country_name"] for c in countries]
+country_map = {c["country_name"]: c for c in countries}
+
+col1, col2 = st.columns(2)
 
 with col1:
-    st.metric("Risk Level", "TBD")
+    selected_name = st.selectbox("Select a Country", country_names)
 
 with col2:
-    st.metric("Asylum Applications", "TBD")
+    selected_year = st.number_input("Select a Year", min_value=2010, max_value=2023, value=2019)
 
-with col3:
-    st.metric("Active NGOs", "TBD")
+if st.button("Generate Summary", type="primary", use_container_width=True):
 
-st.write("#### Summary Notes")
+    country = country_map[selected_name]
+    country_id = country["country_id"]
+    country_code = country["country_code"]
 
-st.write(
-    f"{selected_country} will have a short summary here showing climate stressors, "
-    "displacement pressure, NGO coverage, and recommended humanitarian action."
-)
+    # Fetch year data for the selected country
+    try:
+        year_resp = requests.get(f"{API_BASE}/countries/{country_id}/year-data")
+        if year_resp.status_code != 200:
+            st.error("Could not load year data for this country.")
+            st.stop()
+        year_data = year_resp.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Could not connect to the API: {e}")
+        st.stop()
 
-st.divider()
+    # Find the row matching the selected year
+    year_row = next((r for r in year_data if r["year"] == selected_year), None)
 
-if st.button("Generate PDF Summary", type="primary", use_container_width=True):
-    st.info("*PLACEHOLDER - YADIEL WILL FIX")
+    if year_row is None:
+        st.warning(f"No data found for {selected_name} in {selected_year}. Try a different year.")
+        st.stop()
+
+    # Build prediction payload
+    prediction_payload = {
+        "country_code": country_code,
+        "year": year_row["year"],
+        "gdp_per_capita": year_row.get("gdp_per_capita", 0),
+        "unemployment_rate": year_row.get("unemployment_rate", 0),
+        "population": year_row.get("population", 0),
+        "urban_pct": year_row.get("urban_pct", 0),
+        "temp_mean": year_row.get("temp_mean", 0),
+        "heatwave_days": year_row.get("heatwave_days", 0),
+        "precip_total": year_row.get("precip_total", 0),
+        "precip_days_heavy": year_row.get("precip_days_heavy", 0),
+        "dry_days": year_row.get("dry_days", 0),
+        "evapotrans_total": year_row.get("evapotrans_total", 0),
+    }
+
+    # Use real asylum data for past years, model prediction for future years
+    actual_asylum = year_row.get("asylum_applications")
+    is_future = selected_year > 2023
+
+    if is_future or actual_asylum is None:
+        try:
+            pred_resp = requests.post(f"{API_BASE}/predict/asylum", json=prediction_payload)
+            if pred_resp.status_code == 200:
+                asylum_value = pred_resp.json()["prediction"]
+                asylum_label = "🔮 Predicted Asylum Applications"
+            else:
+                st.error(f"Prediction failed: {pred_resp.json().get('message', 'Unknown error')}")
+                st.stop()
+        except requests.exceptions.RequestException as e:
+            st.error(f"Could not reach prediction API: {e}")
+            st.stop()
+    else:
+        asylum_value = float(actual_asylum)
+        asylum_label = "📊 Asylum Applications (Actual)"
+
+    # Cast all numeric values safely
+    def to_float(val, default=0):
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return default
+
+    gdp         = to_float(year_row.get("gdp_per_capita"))
+    unemp       = to_float(year_row.get("unemployment_rate"))
+    pop         = to_float(year_row.get("population"))
+    urban       = to_float(year_row.get("urban_pct"))
+    temp        = to_float(year_row.get("temp_mean"))
+    heatwave    = to_float(year_row.get("heatwave_days"))
+    precip      = to_float(year_row.get("precip_total"))
+    precip_h    = to_float(year_row.get("precip_days_heavy"))
+    dry         = to_float(year_row.get("dry_days"))
+    evapotrans  = to_float(year_row.get("evapotrans_total"))
+
+    # Display summary
+    st.divider()
+    st.subheader(f"📋 {selected_name} — {selected_year} Summary")
+
+    m1, m2, m3, m4 = st.columns(4)
+    with m1:
+        st.metric(asylum_label, f"{asylum_value:,.0f}")
+    with m2:
+        st.metric("💰 GDP per Capita", f"${gdp:,.0f}")
+    with m3:
+        st.metric("📉 Unemployment Rate", f"{unemp:.1f}%")
+    with m4:
+        st.metric("👥 Population", f"{pop:,.0f}")
+
+    m5, m6, m7, m8 = st.columns(4)
+    with m5:
+        st.metric("🏙 Urban Population", f"{urban:.1f}%")
+    with m6:
+        st.metric("🌡 Avg Temperature", f"{temp:.1f} °C")
+    with m7:
+        st.metric("☀️ Dry Days", f"{dry:.0f}")
+    with m8:
+        st.metric("🔥 Heatwave Days", f"{heatwave:.0f}")
+
+    st.divider()
+
+    col_a, col_b = st.columns(2)
+
+    with col_a:
+        st.write("#### 🌡 Climate Indicators")
+        st.write(f"**Avg Temperature:** {temp:.1f} °C")
+        st.write(f"**Heatwave Days:** {heatwave:.0f}")
+        st.write(f"**Total Precipitation:** {precip:.1f} mm")
+        st.write(f"**Heavy Precipitation Days:** {precip_h:.0f}")
+        st.write(f"**Dry Days:** {dry:.0f}")
+        st.write(f"**Evapotranspiration:** {evapotrans:.1f}")
+
+    with col_b:
+        st.write("#### 💼 Economic Indicators")
+        st.write(f"**GDP per Capita:** ${gdp:,.2f}")
+        st.write(f"**Unemployment Rate:** {unemp:.1f}%")
+        st.write(f"**Population:** {pop:,.0f}")
+        st.write(f"**Urban Population %:** {urban:.1f}%")
+
+    st.divider()
+
+    # Build export dataframe
+    export_data = {
+        "Country": [selected_name],
+        "Country Code": [country_code],
+        "Year": [selected_year],
+        "Asylum Applications": [round(asylum_value)],
+        "Asylum Data Type": ["Predicted" if is_future or actual_asylum is None else "Actual"],
+        "GDP per Capita": [gdp],
+        "Unemployment Rate (%)": [unemp],
+        "Population": [pop],
+        "Urban Population (%)": [urban],
+        "Avg Temperature (°C)": [temp],
+        "Heatwave Days": [heatwave],
+        "Total Precipitation (mm)": [precip],
+        "Heavy Precipitation Days": [precip_h],
+        "Dry Days": [dry],
+        "Evapotranspiration": [evapotrans],
+    }
+
+    df_export = pd.DataFrame(export_data)
+
+    csv = df_export.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="⬇ Download CSV Summary",
+        data=csv,
+        file_name=f"{selected_name}_{selected_year}_summary.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )

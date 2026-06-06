@@ -62,6 +62,7 @@ with st.form(f"add_ngo_form_{st.session_state.form_key_counter}"):
     )
     focus_area = st.text_input("Focus Area *")
     website = st.text_input("Website URL *")
+    notes = st.text_area("Notes", placeholder="Any additional notes about this NGO (optional)")
 
     # Form submission button
     submitted = st.form_submit_button("Add NGO")
@@ -78,6 +79,7 @@ with st.form(f"add_ngo_form_{st.session_state.form_key_counter}"):
                 "Founding_Year": int(founding_year),
                 "Focus_Area": focus_area,
                 "Website": website,
+                "Notes": notes,
             }
 
             try:

@@ -102,3 +102,28 @@ def train_test_model(
 
     return artifacts
 
+def load_artifacts(model_path=MODEL_PATH):
+    """Load model"""
+    if not os.path.exists(model_path):
+        print("No saved model found — training one now...\n")
+        return train_test_model(model_path=model_path)
+    return joblib.load(model_path)
+
+def predict(user_inputs, model=None, model_path=MODEL_PATH)
+    """Predict climate variables for a single row"""
+
+    if model is None:
+        artifacts = load_artifacts(model_path)
+        model = artifacts["model"]
+
+    row = pd.DataFrame([user_inputs])
+    preds = model.predict(row)[0]
+
+    return {
+        "heatwave_days_pred": float(preds[0]),
+        "precip_days_heavy_pred": float(preds[1]),
+        "dry_days_pred": float(preds[2]),
+    }
+
+if __name__ == "__main__":
+    train_test_model()

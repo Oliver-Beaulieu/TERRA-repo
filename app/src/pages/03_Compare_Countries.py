@@ -58,26 +58,6 @@ def fetch_year_data(country_id: int):
     return []
 
 
-def run_prediction(country_code: str, row: dict) -> float | None:
-    """Call POST /predict/asylum using the feature values already stored in year data."""
-    payload = {
-        "country_code":      country_code,
-        "gdp_per_capita":    row.get("gdp_per_capita")    or 0.0,
-        "unemployment_rate": row.get("unemployment_rate") or 0.0,
-        "temp_mean":         row.get("temp_mean")         or 0.0,
-        "heatwave_days":     int(row.get("heatwave_days") or 0),
-        "precip_days_heavy": int(row.get("precip_days_heavy") or 0),
-        "dry_days":          int(row.get("dry_days")      or 0),
-    }
-    try:
-        resp = requests.post(f"{API_BASE}/predict/asylum", json=payload, timeout=5)
-        if resp.status_code == 200:
-            return float(resp.json()["prediction"])
-    except Exception:
-        pass
-    return None
-
-
 # ── load country list ─────────────────────────────────────────────────────────
 
 all_countries_data = fetch_all_countries()
@@ -105,12 +85,6 @@ col_a, col_b = st.columns([1, 2])
 mode = col_a.radio("Breakdown", ["By country", "By region"], horizontal=True)
 yr   = col_b.slider("Year range", 2010, 2023,
                     (int(raw_range[0]), int(raw_range[1])))
-
-show_pred = st.checkbox(
-    "Overlay Model 1 predictions",
-    value=False,
-    help="Uses the actual stored feature values for each country-year to run Model 1 and compare predicted vs actual asylum applications."
-)
 
 if not selected:
     st.info("Pick at least one country to compare.")
@@ -146,47 +120,19 @@ if df_actual.empty:
     st.warning("No data found for the selected countries and year range.")
     st.stop()
 
-# Build prediction rows (optional)
-pred_rows = []
-if show_pred:
-    with st.spinner("Running Model 1 predictions… (one API call per country-year)"):
-        for cname, rows in raw_store.items():
-            country_code = name_to_country[cname]["country_code"]
-            for row in rows:
-                if row["year"] not in years_filter:
-                    continue
-                pred = run_prediction(country_code, row)
-                if pred is not None:
-                    pred_rows.append({
-                        "Country": cname,
-                        "Region":  COUNTRY_REGION.get(cname, "Other"),
-                        "Year":    row["year"],
-                        "Asylum Applications": pred,
-                        "Type":    "Predicted",
-                    })
-
-df_pred = pd.DataFrame(pred_rows) if pred_rows else pd.DataFrame()
-
 # ── aggregate by mode ─────────────────────────────────────────────────────────
 
-def build_plot_df(df_act, df_prd, by_region: bool) -> pd.DataFrame:
-    frames = []
-    for df_in, label_suffix in [(df_act, "Actual"), (df_prd, "Predicted")]:
-        if df_in.empty:
-            continue
-        if by_region:
-            grouped = (
-                df_in.groupby(["Region", "Year"])["Asylum Applications"]
-                .sum().reset_index()
-            )
-            grouped["Series"] = grouped["Region"] + f" ({label_suffix})"
-        else:
-            grouped = df_in.copy()
-            grouped["Series"] = grouped["Country"] + f" ({label_suffix})"
-        frames.append(grouped[["Series", "Year", "Asylum Applications"]])
-    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
-
-plot_df = build_plot_df(df_actual, df_pred, mode == "By region")
+if mode == "By region":
+    grouped = (
+        df_actual.groupby(["Region", "Year"])["Asylum Applications"]
+        .sum().reset_index()
+    )
+    grouped["Series"] = grouped["Region"]
+    plot_df = grouped[["Series", "Year", "Asylum Applications"]]
+else:
+    plot_df = df_actual.copy()
+    plot_df["Series"] = plot_df["Country"]
+    plot_df = plot_df[["Series", "Year", "Asylum Applications"]]
 
 if plot_df.empty:
     st.warning("Nothing to plot.")
@@ -208,12 +154,6 @@ else:
         plot_df, x="Year", y="Asylum Applications", color="Series",
         markers=True,
     )
-    # Dashed lines for predicted series
-    for trace in fig.data:
-        if "(Predicted)" in trace.name:
-            trace.line.dash    = "dash"
-            trace.line.width   = 2
-            trace.marker.symbol = "circle-open"
 
 fig.update_xaxes(dtick=1)
 fig.update_layout(
@@ -222,9 +162,6 @@ fig.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
 )
 st.plotly_chart(fig, use_container_width=True)
-
-if show_pred and not df_pred.empty:
-    st.caption("— solid lines = actual data from database   · · · dashed lines = Model 1 predictions")
 
 # ── summary table ─────────────────────────────────────────────────────────────
 

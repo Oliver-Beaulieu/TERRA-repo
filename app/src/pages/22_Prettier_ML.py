@@ -103,7 +103,7 @@ st.write(
 )
 
 try:
-    obs_response = requests.get('http://web-api:4000/model2/observations')
+    obs_response = requests.get(f'http://web-api:4000/model2/observations')
     obs_response.raise_for_status()
     obs_data = obs_response.json()
     df = pd.DataFrame(obs_data)

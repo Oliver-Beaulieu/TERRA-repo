@@ -10,7 +10,7 @@ SideBarLinks()
 st.title("NGO Directory")
 
 # API endpoint
-API_URL = "http://web-api:4000/ngo/ngos"
+API_URL = f"http://web-api:4000/ngo/ngos"
 
 # Create filter columns
 col1, col2, col3 = st.columns(3)
@@ -92,4 +92,4 @@ try:
 
 except requests.exceptions.RequestException as e:
     st.error(f"Error connecting to the API: {str(e)}")
-    st.info("Please ensure the API server is running on http://web-api:4000")
+    st.info(f"Please ensure the API server is running on http://web-api:4000")

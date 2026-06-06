@@ -247,6 +247,19 @@ CREATE TABLE IF NOT EXISTS country_summary_report (
 -- regression (see api/backend/ml_models/terra_model_1.py).
 -- ============================================================
 
+-- ROLES & USERS -- seed personas so saved_views FK is satisfied
+INSERT INTO roles (role_id, role_name, description) VALUES
+    (1, 'policy_analyst',          'Political analyst persona (Gabriel)'),
+    (2, 'humanitarian_coordinator','Humanitarian coordinator persona (Diana)'),
+    (3, 'student_user',            'Climate-displaced student persona (Mohammed)'),
+    (4, 'administrator',           'System administrator');
+
+INSERT INTO users (user_id, role_id, email, display_name) VALUES
+    (1, 1, 'gabriel@terra.eu',  'Gabriel'),
+    (2, 2, 'diana@terra.eu',    'Diana'),
+    (3, 3, 'mohammed@terra.eu', 'Mohammed'),
+    (4, 4, 'admin@terra.eu',    'Admin');
+
 -- COUNTRY -- the 27 EU member states present in merged_data.csv
 INSERT INTO country (country_id, country_code, country_name) VALUES
     (1, 'AT', 'Austria'),

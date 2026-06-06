@@ -84,7 +84,7 @@ def train_test_model(
     print("RMSE:", rmse)
     print("MAE:", mae)
 
-    artifact = {
+    artifacts = {
         "model": model,
         "numeric_features": numeric_features,
         "categorical_features": categorical_features,
@@ -109,7 +109,7 @@ def load_artifacts(model_path=MODEL_PATH):
         return train_test_model(model_path=model_path)
     return joblib.load(model_path)
 
-def predict(user_inputs, model=None, model_path=MODEL_PATH)
+def predict(user_inputs, model=None, model_path=MODEL_PATH):
     """Predict climate variables for a single row"""
 
     if model is None:
@@ -117,6 +117,7 @@ def predict(user_inputs, model=None, model_path=MODEL_PATH)
         model = artifacts["model"]
 
     row = pd.DataFrame([user_inputs])
+    row = row.reindex(columns=numeric_features + categorical_features, fill_value=0)
     preds = model.predict(row)[0]
 
     return {

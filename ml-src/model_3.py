@@ -23,3 +23,41 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 # Paths
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(HERE, "..", "datasets", "processed", "merged_data.csv")
+MODEL_PATH = os.path.join(HERE, "..", "outputs", "model_3_multi_linreg.joblib")
+
+# Feature definitions
+numeric_features = ["gdp_per_capita", "unemployment_rate", "population", "urban_pct", "asylum_applications"]
+categorical_features = ["country_code"]
+
+targets = ["heatwave_days", "precip_days_heavy", "dry_days"]
+
+def load_data(path=DATA_PATH):
+    """Load the merged dataset"""
+    df = pd.read_csv(path)
+    df = df.dropna(subset=targets).copy()
+    return df
+
+def prepare_data(df):
+    """Prepare features and targets"""
+    df = df.copy()
+
+    X = df[numeric_features + categorical_features]
+    y = df[targets]
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", StandardScaler(), numeric_features),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+        ]
+    )
+
+    model = Pipeline(steps=[
+        ("preprocessor", preprocessor),
+        ("regressor", LinearRegression())
+    ])
+
+    return X, y, model
+
+
+

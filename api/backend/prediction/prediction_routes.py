@@ -4,10 +4,6 @@ from backend.utils import error_response
 import sys
 import os
 
-# make ml-src importable so we can reuse model_1.py
-sys.path.append("/ml-src")
-import model_1
-
 prediction_bp = Blueprint("prediction", __name__)
 
 
@@ -20,6 +16,9 @@ def make_prediction():
         if not user_inputs:
             return error_response("No input data provided", 400)
 
+        if "/ml-src" not in sys.path:
+            sys.path.append("/ml-src")
+        import model_1
         result = model_1.predict(user_inputs)
         return jsonify({"predicted_asylum_applications": round(result)}), 200
     except Exception as e:

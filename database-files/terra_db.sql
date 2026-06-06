@@ -704,7 +704,7 @@ CREATE TABLE IF NOT EXISTS WorldNGOs (
     Focus_Area VARCHAR(100),
     Website VARCHAR(255),
     Notes TEXT
-);s
+);
 
 INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website) VALUES
 ('World Wildlife Fund', 'United States', 1961, 'Environmental Conservation', 'https://www.worldwildlife.org'),

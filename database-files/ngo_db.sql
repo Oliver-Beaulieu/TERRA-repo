@@ -62,14 +62,6 @@ VALUES
 ('Open Society Foundations', 'Organization', 3000000.00, 4),
 ('Anonymous Philanthropist', 'Individual', 1000000.00, 5);
 
-CREATE TABLE model1_params (
-    sequence_number INT,
-    beta_vals TEXT
-);
-
-INSERT INTO model1_params (sequence_number, beta_vals) VALUES
-(1, '[0.25, 0.45, 0.67]');
-
 -- Belgium World Bank energy/GDP data (from GDP_Energy_WBdat.csv, Belgium subset)
 -- CO2_Upop is a derived column: CO2_emit / Urban_pop (computed from the raw data)
 -- This is the dataset used to fit model02 (GDP ~ Fossil_Fuels + CO2_Upop)

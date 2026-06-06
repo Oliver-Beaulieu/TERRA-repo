@@ -86,8 +86,8 @@ def create_ngo():
                 return error_response(f"Missing required field: {field}", 400)
 
         query = """
-            INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website, Notes)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
         with get_db().cursor(dictionary=True) as cursor:
             cursor.execute(query, (
@@ -96,6 +96,7 @@ def create_ngo():
                 data["Founding_Year"],
                 data["Focus_Area"],
                 data["Website"],
+                data.get("Notes", ""),
             ))
             new_id = cursor.lastrowid
 
@@ -117,7 +118,7 @@ def update_ngo(ngo_id):
         data = request.get_json()
 
         # Build update query dynamically based on provided fields
-        allowed_fields = ["Name", "Country", "Founding_Year", "Focus_Area", "Website"]
+        allowed_fields = ["Name", "Country", "Founding_Year", "Focus_Area", "Website", "Notes"]
         update_fields = [f"{f} = %s" for f in allowed_fields if f in data]
         params = [data[f] for f in allowed_fields if f in data]
 
@@ -158,40 +159,4 @@ def delete_ngo(ngo_id):
         return jsonify({"message": "NGO deleted successfully"}), 200
     except Error as e:
         current_app.logger.error(f'Database error in delete_ngo: {e}')
-        return error_response(str(e))
-
-
-# Get all projects associated with a specific NGO
-# Example: /ngo/ngos/1/projects
-@ngo_bp.route("/ngos/<int:ngo_id>/projects", methods=["GET"])
-def get_ngo_projects(ngo_id):
-    current_app.logger.info(f'GET /ngo/ngos/{ngo_id}/projects')
-    try:
-        with get_db().cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT NGO_ID FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-            if not cursor.fetchone():
-                return error_response("NGO not found", 404)
-
-            cursor.execute("SELECT * FROM Projects WHERE NGO_ID = %s", (ngo_id,))
-            return jsonify(cursor.fetchall()), 200
-    except Error as e:
-        current_app.logger.error(f'Database error in get_ngo_projects: {e}')
-        return error_response(str(e))
-
-
-# Get all donors associated with a specific NGO
-# Example: /ngo/ngos/1/donors
-@ngo_bp.route("/ngos/<int:ngo_id>/donors", methods=["GET"])
-def get_ngo_donors(ngo_id):
-    current_app.logger.info(f'GET /ngo/ngos/{ngo_id}/donors')
-    try:
-        with get_db().cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT NGO_ID FROM WorldNGOs WHERE NGO_ID = %s", (ngo_id,))
-            if not cursor.fetchone():
-                return error_response("NGO not found", 404)
-
-            cursor.execute("SELECT * FROM Donors WHERE NGO_ID = %s", (ngo_id,))
-            return jsonify(cursor.fetchall()), 200
-    except Error as e:
-        current_app.logger.error(f'Database error in get_ngo_donors: {e}')
         return error_response(str(e))

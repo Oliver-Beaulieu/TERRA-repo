@@ -13,8 +13,8 @@ st.title("NGO Profile")
 ngo_id = st.session_state.get("selected_ngo_id")
 
 if ngo_id is None:
-    st.error("No NGO selected")
-    if st.button("Return to NGO Directory"):
+    st.info("Please select an NGO from the directory first.")
+    if st.button("Go to NGO Directory", key="no_ngo_return"):
         st.switch_page("pages/14_NGO_Directory.py")
 else:
     # API endpoint
@@ -38,34 +38,20 @@ else:
                 st.write(f"**Founded:** {ngo['Founding_Year']}")
                 st.write(f"**Focus Area:** {ngo['Focus_Area']}")
                 st.write(f"**Website:** [{ngo['Website']}]({ngo['Website']})")
+                if ngo.get("Notes"):
+                    st.write(f"**Notes:** {ngo['Notes']}")
 
-            # Display projects
-            if ngo.get("projects"):
-                st.subheader("Projects")
-                for project in ngo["projects"]:
-                    with st.expander(
-                        f"{project['Project_Name']} ({project['Focus_Area']})"
-                    ):
-                        budget = float(project["Budget"]) if project["Budget"] else 0.0
-                        st.write(f"**Budget:** ${budget:,.2f}")
-                        st.write(f"**Start Date:** {project['Start_Date']}")
-                        st.write(f"**End Date:** {project['End_Date']}")
-            else:
-                st.info("No projects found for this NGO")
+            with col2:
+                st.subheader("Actions")
+                if st.button("🗑 Remove This NGO", type="primary", use_container_width=True):
+                    delete_response = requests.delete(API_URL)
+                    if delete_response.status_code == 200:
+                        st.success(f"{ngo['Name']} has been removed.")
+                        del st.session_state["selected_ngo_id"]
+                        st.switch_page("pages/14_NGO_Directory.py")
+                    else:
+                        st.error("Failed to remove NGO.")
 
-            # Display donors
-            if ngo.get("donors"):
-                st.subheader("Donors")
-                for donor in ngo["donors"]:
-                    with st.expander(f"{donor['Donor_Name']} ({donor['Donor_Type']})"):
-                        donation = (
-                            float(donor["Donation_Amount"])
-                            if donor["Donation_Amount"]
-                            else 0.0
-                        )
-                        st.write(f"**Donation Amount:** ${donation:,.2f}")
-            else:
-                st.info("No donors found for this NGO")
 
         elif response.status_code == 404:
             st.error("NGO not found")
@@ -79,8 +65,7 @@ else:
         st.info("Please ensure the API server is running")
 
 # Add a button to return to the NGO Directory
-if st.button("Return to NGO Directory"):
-    # Clear the selected NGO ID from session state
+if st.button("Return to NGO Directory", key="bottom_return"):
     if "selected_ngo_id" in st.session_state:
         del st.session_state["selected_ngo_id"]
     st.switch_page("pages/14_NGO_Directory.py")

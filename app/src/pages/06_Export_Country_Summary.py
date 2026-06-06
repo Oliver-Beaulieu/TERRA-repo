@@ -6,6 +6,8 @@ import streamlit as st
 import pandas as pd
 from modules.nav import SideBarLinks
 
+API_BASE = "http://web-api:4000"
+
 st.set_page_config(layout='wide')
 
 SideBarLinks()
@@ -19,7 +21,6 @@ st.write(
 
 st.divider()
 
-API_BASE = "http://web-api:4000"
 
 # Load all countries from DB
 try:

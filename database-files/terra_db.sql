@@ -706,6 +706,28 @@ CREATE TABLE IF NOT EXISTS WorldNGOs (
     Notes TEXT
 );
 
+CREATE TABLE IF NOT EXISTS Projects (
+    Project_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Project_Name VARCHAR(255) NOT NULL,
+    Focus_Area VARCHAR(100),
+    Budget DECIMAL(15, 2),
+    NGO_ID INT,
+    Start_Date DATE,
+    End_Date DATE,
+    FOREIGN KEY (NGO_ID) REFERENCES WorldNGOs(NGO_ID)
+);
+
+
+CREATE TABLE IF NOT EXISTS Donors (
+    Donor_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Donor_Name VARCHAR(255) NOT NULL,
+    Donor_Type ENUM('Individual', 'Organization') NOT NULL,
+    Donation_Amount DECIMAL(15, 2),
+    NGO_ID INT,
+    FOREIGN KEY (NGO_ID) REFERENCES WorldNGOs(NGO_ID)
+);
+
+
 INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website) VALUES
 ('World Wildlife Fund', 'United States', 1961, 'Environmental Conservation', 'https://www.worldwildlife.org'),
 ('Doctors Without Borders', 'France', 1971, 'Medical Relief', 'https://www.msf.org'),

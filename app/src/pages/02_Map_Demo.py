@@ -1,102 +1,221 @@
 import logging
 logger = logging.getLogger(__name__)
+
+import requests
 import streamlit as st
 import pandas as pd
-import pydeck as pdk
-from urllib.error import URLError
+import plotly.express as px
 from modules.nav import SideBarLinks
 
-st.set_page_config(layout='wide')
-
+st.set_page_config(layout="wide")
 SideBarLinks()
 
-# set up the page
-st.markdown("# Mapping Demo")
-st.sidebar.header("Mapping Demo")
+st.title("EU Asylum Risk Map")
 st.write(
-    """This Mapping Demo is from the Streamlit Documentation. It shows how to use
-[`st.pydeck_chart`](https://docs.streamlit.io/library/api-reference/charts/st.pydeck_chart)
-to display geospatial data."""
+    "Enter scenario conditions below. TERRA **Model 1** (Linear Regression) "
+    "predicts asylum applications for every EU country — dots on the map are "
+    "sized by predicted volume and colored by risk level."
 )
 
+API_BASE = "http://web-api:4000"
 
-@st.cache_data
-def from_data_file(filename):
-    url = (
-        "http://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename
-    )
-    return pd.read_json(url)
+# EU country centroids — lat/lon used by st.map
+EU_COUNTRIES = {
+    "AT": {"name": "Austria",      "lat": 47.52,  "lon": 14.55},
+    "BE": {"name": "Belgium",      "lat": 50.50,  "lon": 4.47},
+    "BG": {"name": "Bulgaria",     "lat": 42.73,  "lon": 25.49},
+    "CY": {"name": "Cyprus",       "lat": 35.13,  "lon": 33.43},
+    "CZ": {"name": "Czechia",      "lat": 49.82,  "lon": 15.47},
+    "DE": {"name": "Germany",      "lat": 51.17,  "lon": 10.45},
+    "DK": {"name": "Denmark",      "lat": 56.26,  "lon": 9.50},
+    "EE": {"name": "Estonia",      "lat": 58.60,  "lon": 25.01},
+    "ES": {"name": "Spain",        "lat": 40.46,  "lon": -3.75},
+    "FI": {"name": "Finland",      "lat": 61.92,  "lon": 25.75},
+    "FR": {"name": "France",       "lat": 46.23,  "lon": 2.21},
+    "GR": {"name": "Greece",       "lat": 39.07,  "lon": 21.82},
+    "HR": {"name": "Croatia",      "lat": 45.10,  "lon": 15.20},
+    "HU": {"name": "Hungary",      "lat": 47.16,  "lon": 19.50},
+    "IE": {"name": "Ireland",      "lat": 53.41,  "lon": -8.24},
+    "IT": {"name": "Italy",        "lat": 41.87,  "lon": 12.57},
+    "LT": {"name": "Lithuania",    "lat": 55.17,  "lon": 23.88},
+    "LU": {"name": "Luxembourg",   "lat": 49.82,  "lon": 6.13},
+    "LV": {"name": "Latvia",       "lat": 56.88,  "lon": 24.60},
+    "MT": {"name": "Malta",        "lat": 35.94,  "lon": 14.38},
+    "NL": {"name": "Netherlands",  "lat": 52.13,  "lon": 5.29},
+    "PL": {"name": "Poland",       "lat": 51.92,  "lon": 19.15},
+    "PT": {"name": "Portugal",     "lat": 39.40,  "lon": -8.22},
+    "RO": {"name": "Romania",      "lat": 45.94,  "lon": 24.97},
+    "SE": {"name": "Sweden",       "lat": 60.13,  "lon": 18.64},
+    "SI": {"name": "Slovenia",     "lat": 46.15,  "lon": 14.99},
+    "SK": {"name": "Slovakia",     "lat": 48.67,  "lon": 19.70},
+}
 
+# RGBA color per risk level — used by st.map's color parameter
+RISK_COLORS = {
+    "Low":      [26,  152, 80,  180],   # green
+    "Medium":   [254, 224, 139, 200],   # yellow
+    "High":     [252, 141, 89,  200],   # orange
+    "Critical": [215, 48,  39,  220],   # red
+}
 
-try:
-    ALL_LAYERS = {
-        "Bike Rentals": pdk.Layer(
-            "HexagonLayer",
-            data=from_data_file("bike_rental_stats.json"),
-            get_position=["lon", "lat"],
-            radius=200,
-            elevation_scale=4,
-            elevation_range=[0, 1000],
-            extruded=True,
-        ),
-        "Bart Stop Exits": pdk.Layer(
-            "ScatterplotLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_color=[200, 30, 0, 160],
-            get_radius="[exits]",
-            radius_scale=0.05,
-        ),
-        "Bart Stop Names": pdk.Layer(
-            "TextLayer",
-            data=from_data_file("bart_stop_stats.json"),
-            get_position=["lon", "lat"],
-            get_text="name",
-            get_color=[0, 0, 0, 200],
-            get_size=15,
-            get_alignment_baseline="'bottom'",
-        ),
-        "Outbound Flow": pdk.Layer(
-            "ArcLayer",
-            data=from_data_file("bart_path_stats.json"),
-            get_source_position=["lon", "lat"],
-            get_target_position=["lon2", "lat2"],
-            get_source_color=[200, 30, 0, 160],
-            get_target_color=[200, 30, 0, 160],
-            auto_highlight=True,
-            width_scale=0.0001,
-            get_width="outbound",
-            width_min_pixels=3,
-            width_max_pixels=30,
-        ),
+st.divider()
+st.subheader("Enter scenario conditions")
+st.caption(
+    "Values are applied to every EU country. Country identity is encoded "
+    "automatically so each country still produces a distinct prediction."
+)
+
+# ── Input form — same layout as 11_Prediction.py ────────────────────────────
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    gdp_per_capita = st.number_input("GDP per Capita", min_value=0.0, value=55000.0)
+    unemployment_rate = st.number_input("Unemployment Rate", min_value=0.0, max_value=100.0, value=5.5)
+
+with col2:
+    temp_mean = st.number_input("Average Temperature (°C)", value=12.0)
+    heatwave_days = st.number_input("Heatwave Days", min_value=0, value=0)
+
+with col3:
+    precip_days_heavy = st.number_input("Heavy Precipitation Days", min_value=0, value=3)
+    dry_days = st.number_input("Dry Days", min_value=0, value=220)
+
+st.divider()
+
+if st.button("Run Risk Map", type="primary", use_container_width=True):
+
+    scenario = {
+        "gdp_per_capita": gdp_per_capita,
+        "unemployment_rate": unemployment_rate,
+        "temp_mean": temp_mean,
+        "heatwave_days": heatwave_days,
+        "precip_days_heavy": precip_days_heavy,
+        "dry_days": dry_days,
     }
-    st.sidebar.markdown("### Map Layers")
-    selected_layers = [
-        layer
-        for layer_name, layer in ALL_LAYERS.items()
-        if st.sidebar.checkbox(layer_name, True)
-    ]
-    if selected_layers:
-        st.pydeck_chart(
-            pdk.Deck(
-                map_style="mapbox://styles/mapbox/light-v9",
-                initial_view_state={
-                    "latitude": 37.76,
-                    "longitude": -122.4,
-                    "zoom": 11,
-                    "pitch": 50,
-                },
-                layers=selected_layers,
-            )
+
+    rows = []
+    errors = []
+
+    with st.spinner("Running Model 1 for all 27 EU countries…"):
+        progress = st.progress(0)
+        total = len(EU_COUNTRIES)
+
+        for i, (code2, info) in enumerate(EU_COUNTRIES.items()):
+            payload = {"country_code": code2, **scenario}
+            try:
+                r = requests.post(f"{API_BASE}/predict/asylum", json=payload, timeout=15)
+                pred = r.json()["prediction"] if r.status_code == 200 else 0
+            except requests.exceptions.RequestException:
+                pred = 0
+                errors.append(info["name"])
+
+            if pred < 1000:
+                risk = "Low"
+            elif pred < 10000:
+                risk = "Medium"
+            elif pred < 50000:
+                risk = "High"
+            else:
+                risk = "Critical"
+
+            rows.append({
+                "country": info["name"],
+                "code": code2,
+                "lat": info["lat"],
+                "lon": info["lon"],
+                "predicted_asylum": float(pred),
+                "risk_level": risk,
+                "color": RISK_COLORS[risk],
+                # st.map size column — scale dot to prediction volume
+                "size": max(500, min(int(pred / 10), 80000)),
+            })
+            progress.progress((i + 1) / total)
+
+    progress.empty()
+
+    if errors:
+        st.warning(f"Could not get predictions for: {', '.join(errors)}")
+
+    st.session_state["map_df"] = pd.DataFrame(rows)
+
+# ── Render results ───────────────────────────────────────────────────────────
+if "map_df" in st.session_state:
+    df = st.session_state["map_df"]
+
+    # KPI cards
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("EU Countries Mapped", len(df))
+    m2.metric("Highest Predicted Asylum", f"{df['predicted_asylum'].max():,.0f}")
+    m3.metric("Average Predicted Asylum", f"{df['predicted_asylum'].mean():,.0f}")
+    m4.metric("Critical Risk Countries", int((df["risk_level"] == "Critical").sum()))
+
+    st.divider()
+
+    # Legend
+    leg_cols = st.columns(4)
+    for col, (level, rgba) in zip(leg_cols, RISK_COLORS.items()):
+        r, g, b, _ = rgba
+        col.markdown(
+            f'<span style="background:rgb({r},{g},{b});padding:4px 10px;'
+            f'border-radius:4px;color:#111;font-weight:600">{level}</span>',
+            unsafe_allow_html=True,
         )
-    else:
-        st.error("Please choose at least one layer above.")
-except URLError as e:
-    st.error(
-        """
-        **This demo requires internet access.**
-        Connection error: %s
-    """
-        % e.reason
+
+    st.write("")
+
+    # st.map — native Streamlit map using lat/lon columns.
+    # color= accepts an RGBA list column; size= scales each dot.
+    # Streamlit feature used: st.map
+    st.map(
+        df,
+        latitude="lat",
+        longitude="lon",
+        color="color",
+        size="size",
+        zoom=3,
+        use_container_width=True,
     )
+
+    # Tabs: ranked table + bar chart breakdown
+    st.divider()
+    tab_table, tab_chart = st.tabs(["Country Rankings", "Risk Level Breakdown"])
+
+    df_sorted = df.sort_values("predicted_asylum", ascending=False).reset_index(drop=True)
+    df_sorted.index += 1
+
+    with tab_table:
+        st.dataframe(
+            df_sorted[["country", "code", "predicted_asylum", "risk_level"]].rename(columns={
+                "country": "Country",
+                "code": "Code",
+                "predicted_asylum": "Predicted Asylum Apps",
+                "risk_level": "Risk Level",
+            }),
+            use_container_width=True,
+            height=400,
+        )
+
+    with tab_chart:
+        counts = (
+            df["risk_level"]
+            .value_counts()
+            .reindex(["Critical", "High", "Medium", "Low"], fill_value=0)
+            .reset_index()
+        )
+        counts.columns = ["Risk Level", "Countries"]
+        bar_fig = px.bar(
+            counts,
+            x="Risk Level", y="Countries",
+            color="Risk Level",
+            color_discrete_map={
+                "Critical": "#d73027",
+                "High":     "#fc8d59",
+                "Medium":   "#fee08b",
+                "Low":      "#1a9850",
+            },
+            text="Countries",
+            title="Countries per Risk Level",
+        )
+        bar_fig.update_traces(textposition="outside")
+        bar_fig.update_layout(showlegend=False, margin=dict(t=40, b=0))
+        st.plotly_chart(bar_fig, use_container_width=True)

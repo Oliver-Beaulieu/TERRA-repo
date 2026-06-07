@@ -142,9 +142,34 @@ def SideBarLinks(show_home=False):
     The role is stored in st.session_state when the user logs in on Home.py.
     """
 
-    # Logo appears at the top of the sidebar on every page
-    logo_path = Path(__file__).parent.parent / "assets" / "TerraLo.png"
-    st.sidebar.image(str(logo_path), width=150)
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {
+            background-color: #112233 !important;
+            border-right: 2px solid #3dba7e !important;
+            box-shadow: 4px 0 18px rgba(61,186,126,0.25) !important;
+        }
+        [data-testid="stSidebarContent"] {
+            background-color: #112233 !important;
+        }
+        [data-testid="stSidebar"] img {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    logo_path = Path(__file__).parent.parent / "assets" / "TERRALogo.png"
+    st.sidebar.image(str(logo_path), use_container_width=True)
+
+    # Decorative gradient divider below logo
+    st.sidebar.markdown("""
+    <div style="margin: 4px 0 12px 0;">
+        <div style="height: 2px; background: linear-gradient(90deg, transparent, #3dba7e, transparent); border-radius: 2px;"></div>
+        <div style="text-align: center; font-size: 16px; margin: 8px 0 2px 0; letter-spacing: 8px; opacity: 0.5;">🌍 🌿 🌊</div>
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(61,186,126,0.4), transparent); border-radius: 1px;"></div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # If no one is logged in, send them to the Home (login) page
     if "authenticated" not in st.session_state:
@@ -185,6 +210,15 @@ def SideBarLinks(show_home=False):
             ml_model_mgmt_nav()
             new_ml_model_nav()
             
+    # Decorative footer divider
+    st.sidebar.markdown("""
+    <div style="margin: 12px 0 4px 0;">
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(61,186,126,0.4), transparent);"></div>
+        <div style="text-align: center; font-size: 10px; color: rgba(61,186,126,0.45); letter-spacing: 3px; text-transform: uppercase; margin: 8px 0 4px 0;">Track · Protect · Act</div>
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(61,186,126,0.4), transparent);"></div>
+    </div>
+    """, unsafe_allow_html=True)
+
     # About link appears at the bottom for all roles
     about_page_nav()
 

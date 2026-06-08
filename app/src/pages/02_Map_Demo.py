@@ -176,46 +176,19 @@ if "map_df" in st.session_state:
         use_container_width=True,
     )
 
-    # Tabs: ranked table + bar chart breakdown
+    # Country rankings table
     st.divider()
-    tab_table, tab_chart = st.tabs(["Country Rankings", "Risk Level Breakdown"])
-
     df_sorted = df.sort_values("predicted_asylum", ascending=False).reset_index(drop=True)
     df_sorted.index += 1
 
-    with tab_table:
-        st.dataframe(
-            df_sorted[["country", "code", "predicted_asylum", "risk_level"]].rename(columns={
-                "country": "Country",
-                "code": "Code",
-                "predicted_asylum": "Predicted Asylum Apps",
-                "risk_level": "Risk Level",
-            }),
-            use_container_width=True,
-            height=400,
-        )
-
-    with tab_chart:
-        counts = (
-            df["risk_level"]
-            .value_counts()
-            .reindex(["Critical", "High", "Medium", "Low"], fill_value=0)
-            .reset_index()
-        )
-        counts.columns = ["Risk Level", "Countries"]
-        bar_fig = px.bar(
-            counts,
-            x="Risk Level", y="Countries",
-            color="Risk Level",
-            color_discrete_map={
-                "Critical": "#d73027",
-                "High":     "#fc8d59",
-                "Medium":   "#fee08b",
-                "Low":      "#1a9850",
-            },
-            text="Countries",
-            title="Countries per Risk Level",
-        )
-        bar_fig.update_traces(textposition="outside")
-        bar_fig.update_layout(showlegend=False, margin=dict(t=40, b=0))
-        st.plotly_chart(bar_fig, use_container_width=True)
+    st.subheader("Country Rankings")
+    st.dataframe(
+        df_sorted[["country", "code", "predicted_asylum", "risk_level"]].rename(columns={
+            "country": "Country",
+            "code": "Code",
+            "predicted_asylum": "Predicted Asylum Apps",
+            "risk_level": "Risk Level",
+        }),
+        use_container_width=True,
+        height=400,
+    )

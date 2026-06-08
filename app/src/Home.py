@@ -41,14 +41,92 @@ st.markdown("""
         letter-spacing: 16px;
         color: #ffffff;
         margin: 0;
-        text-shadow: 0 4px 32px rgba(61,186,126,0.4);
+        position: relative;
+        display: inline-block;
+        animation: glitch-main 7s infinite;
+    }
+    .terra-title::before,
+    .terra-title::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        font-size: 96px;
+        font-weight: 900;
+        letter-spacing: 16px;
+        overflow: hidden;
+    }
+    .terra-title::before {
+        color: #3dba7e;
+        animation: glitch-top 7s infinite;
+        clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+    }
+    .terra-title::after {
+        color: #00cfff;
+        animation: glitch-bot 7s infinite;
+        clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
+    }
+    @keyframes glitch-main {
+        0%, 90%, 100%  { transform: none; filter: none; }
+        91%            { transform: skewX(-4deg) translateX(6px); filter: brightness(1.3); }
+        92%            { transform: skewX(4deg) translateX(-8px); }
+        93%            { transform: skewX(-2deg) translateX(4px); filter: none; }
+        94%            { transform: none; }
+        96%            { transform: translateX(-5px) skewX(2deg); filter: brightness(1.2); }
+        97%            { transform: translateX(5px); }
+        98%            { transform: none; filter: none; }
+    }
+    @keyframes glitch-top {
+        0%, 89%, 100%  { opacity: 0; transform: translateX(0); }
+        90%            { opacity: 1; transform: translateX(-12px) skewX(-5deg); }
+        91%            { transform: translateX(10px) skewX(3deg); }
+        92%            { transform: translateX(-6px); }
+        93%            { transform: translateX(8px) skewX(-2deg); }
+        94%            { transform: translateX(0); }
+        95%            { opacity: 1; transform: translateX(-10px); }
+        96%            { transform: translateX(6px); }
+        97%            { opacity: 0; }
+    }
+    @keyframes glitch-bot {
+        0%, 89%, 100%  { opacity: 0; transform: translateX(0); }
+        90%            { opacity: 1; transform: translateX(12px) skewX(5deg); }
+        91%            { transform: translateX(-10px) skewX(-3deg); }
+        92%            { transform: translateX(6px); }
+        93%            { transform: translateX(-8px) skewX(2deg); }
+        94%            { transform: translateX(0); }
+        95%            { opacity: 1; transform: translateX(10px); }
+        96%            { transform: translateX(-6px); }
+        97%            { opacity: 0; }
+    }
+    .terra-subtitle-wrap {
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
     }
     .terra-subtitle {
         font-size: 18px;
         color: #7dd9b0;
         letter-spacing: 3px;
-        margin-top: 12px;
         font-weight: 400;
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 2px solid #3dba7e;
+        max-width: 0px;
+        animation: typewriter 6s steps(47, end) 1s infinite,
+                   blink-cursor 0.75s step-end infinite;
+    }
+    @keyframes typewriter {
+        0%   { max-width: 0px; }
+        50%  { max-width: 900px; }
+        75%  { max-width: 900px; }
+        95%  { max-width: 0px; }
+        100% { max-width: 0px; }
+    }
+    @keyframes blink-cursor {
+        from, to { border-color: transparent; }
+        50%      { border-color: #3dba7e; }
     }
     .snapshot-card {
         background: #0d1530;
@@ -79,8 +157,10 @@ st.markdown("""
 </style>
 
 <div class="terra-hero">
-    <div class="terra-title">T.E.R.R.A</div>
-    <div class="terra-subtitle">Tracking European Climate Risk &amp; Refugee Asylum</div>
+    <div class="terra-title" data-text="T.E.R.R.A">T.E.R.R.A</div>
+    <div class="terra-subtitle-wrap">
+        <span class="terra-subtitle">Tracking European Climate Risk &amp; Refugee Asylum</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 

@@ -29,9 +29,9 @@ CREATE TABLE IF NOT EXISTS users (
     created_by INT,
     updated_by INT,
     PRIMARY KEY (user_id),
-    FOREIGN KEY (role_id) REFERENCES roles(role_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (role_id)     REFERENCES roles(role_id)      ON DELETE RESTRICT  ON UPDATE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS country (
     created_by INT,
     updated_by INT,
     PRIMARY KEY (country_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 -- 4. COUNTRY_YEAR_DATA
@@ -81,9 +81,9 @@ CREATE TABLE IF NOT EXISTS country_year_data (
 
     PRIMARY KEY (data_id),
     UNIQUE KEY uq_country_year (country_id, year),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 -- 5. CLIMATE_EVENT
@@ -100,9 +100,9 @@ CREATE TABLE IF NOT EXISTS climate_event (
     created_by INT,
     updated_by INT,
     PRIMARY KEY (event_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 -- 6. RISK_ASSESSMENT - Country risk scores. Used by Gabriel, Diana, and Mohammed.
@@ -121,9 +121,9 @@ CREATE TABLE IF NOT EXISTS risk_assessment (
     updated_by INT,
     PRIMARY KEY (risk_id),
     UNIQUE KEY uq_risk_country_year (country_id, year),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 
@@ -141,9 +141,9 @@ CREATE TABLE IF NOT EXISTS policies (
     created_by INT,
     updated_by INT,
     PRIMARY KEY (policy_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 
@@ -158,8 +158,8 @@ CREATE TABLE IF NOT EXISTS policy_flag (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (flag_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (user_id)     REFERENCES users(user_id)      ON DELETE CASCADE   ON UPDATE CASCADE
 );
 
 -- 9. SAVED_VIEWS - Saved country comparison views for Gabriel.
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS saved_views (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (view_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id)     REFERENCES users(user_id)      ON DELETE CASCADE   ON UPDATE CASCADE
 );
 
 -- 10. SAVED_VIEW_COUNTRY - Table for saved views and countries.
@@ -181,8 +181,8 @@ CREATE TABLE IF NOT EXISTS saved_view_country (
     view_id INT NOT NULL,
     country_id INT NOT NULL,
     PRIMARY KEY (view_id, country_id),
-    FOREIGN KEY (view_id) REFERENCES saved_views(view_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id)
+    FOREIGN KEY (view_id)     REFERENCES saved_views(view_id) ON DELETE CASCADE  ON UPDATE CASCADE,
+    FOREIGN KEY (country_id)  REFERENCES country(country_id)  ON DELETE CASCADE  ON UPDATE CASCADE
 );
 
 -- 11. NGO - Non-Governmental Organizations for Diana.
@@ -198,8 +198,8 @@ CREATE TABLE IF NOT EXISTS ngo (
     created_by INT,
     updated_by INT,
     PRIMARY KEY (ngo_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id),
-    FOREIGN KEY (updated_by) REFERENCES users(user_id)
+    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
+    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
 );
 
 -- 12. NGO_COUNTRY - One NGO can operate in multiple countries. One country can have multiple NGOs.
@@ -209,8 +209,8 @@ CREATE TABLE IF NOT EXISTS ngo_country (
     operating_status VARCHAR(50) DEFAULT 'Active',
     support_notes TEXT,
     PRIMARY KEY (ngo_id, country_id),
-    FOREIGN KEY (ngo_id) REFERENCES ngo(ngo_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id)
+    FOREIGN KEY (ngo_id)      REFERENCES ngo(ngo_id)         ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE
 );
 
 -- 13. WATCHLIST - Countries Mohammed wants to follow.
@@ -221,8 +221,8 @@ CREATE TABLE IF NOT EXISTS watchlist (
     added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (watchlist_id),
     UNIQUE KEY uq_watchlist_user_country (user_id, country_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id)
+    FOREIGN KEY (user_id)     REFERENCES users(user_id)      ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE
 );
 
 -- 14. COUNTRY_SUMMARY_REPORT - Stores exported country summaries for Diana.
@@ -235,8 +235,8 @@ CREATE TABLE IF NOT EXISTS country_summary_report (
     export_format VARCHAR(20),
     generated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (report_id),
-    FOREIGN KEY (country_id) REFERENCES country(country_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE,
+    FOREIGN KEY (user_id)     REFERENCES users(user_id)      ON DELETE CASCADE   ON UPDATE CASCADE
 );
 
 -- ============================================================
@@ -694,6 +694,43 @@ CREATE TABLE IF NOT EXISTS model1_scaler (
 
 INSERT INTO model1_scaler (sequence_number, feature_means, feature_stds) VALUES
     (1, '[33185.727984, 9.589556, 11.565159, 2.024691, 3.530864, 250.26749, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037, 0.037037]', '[22651.161882, 4.844786, 3.707311, 7.427524, 3.502215, 31.255591, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853, 0.188853]');
+
+-- Climate-variables model (TERRA Model 2), multivariate linear regression.
+-- Predicts heatwave_days, precip_days_heavy, and dry_days simultaneously from
+-- economic + demographic + asylum inputs + country_code (one-hot).
+-- intercepts  = JSON list of 3 floats (one per target, in TARGETS order)
+-- coef_matrix = JSON list-of-lists, shape (3 × n_features_after_transform)
+CREATE TABLE IF NOT EXISTS model2_params (
+    sequence_number       INT,
+    target_names          TEXT,   -- JSON list: ["heatwave_days", ...]
+    numeric_feature_names TEXT,   -- JSON list of 5 numeric input names
+    intercepts            TEXT,   -- JSON list of 3 intercept values
+    coef_matrix           TEXT    -- JSON 3×N coefficient matrix
+);
+
+-- StandardScaler parameters for the 5 numeric inputs (fitted on training set).
+CREATE TABLE IF NOT EXISTS model2_scaler (
+    sequence_number INT,
+    feature_means   TEXT,         -- JSON list of 5 means
+    feature_stds    TEXT          -- JSON list of 5 standard deviations
+);
+
+-- OneHotEncoder category list for country_code.
+-- categories = JSON list-of-lists, one inner list per categorical feature
+-- (we only have one: country_code, so it is [[...27 country codes...]]).
+CREATE TABLE IF NOT EXISTS model2_encoder (
+    sequence_number INT,
+    categories      TEXT
+);
+
+INSERT INTO model2_params (sequence_number, target_names, numeric_feature_names, intercepts, coef_matrix) VALUES
+    (1, '["heatwave_days", "precip_days_heavy", "dry_days"]', '["gdp_per_capita", "unemployment_rate", "population", "urban_pct", "asylum_applications"]', '[2.178098, 4.180556, 249.157351]', '[[-0.274306, -0.582799, 3.897121, 0.608021, 0.31685, -0.957097, -2.029462, -0.933391, 38.028521, -1.737593, -16.588309, -0.941919, 0.673002, 1.097562, -0.008487, -12.212643, 11.117978, 1.345987, -0.959183, 1.056867, -8.735512, 0.575696, 0.485114, 0.760912, 1.197651, -3.562758, -6.161892, -0.16947, -1.717047, -1.823661, 1.198855, 1.000281], [0.213234, -0.238607, -12.875671, 7.033476, -0.119123, -3.290298, -13.226354, -6.349959, -8.547075, -4.850858, 35.0329, -18.185262, -10.323278, 14.863684, -8.974175, 27.33898, -5.720611, 7.099407, -2.734605, -2.175338, 34.984389, -6.542005, -23.353886, -7.980013, -24.11754, -12.329513, 19.608707, 3.760425, 12.715216, -15.140063, 15.050279, 3.386847], [-7.319419, -0.36796, -29.599015, -32.791461, -0.738036, -15.532325, 8.559288, -13.547671, 18.549023, -15.673574, 114.230011, 16.578266, -63.69174, 109.032311, -35.689224, 74.475425, 58.204949, -67.750482, -13.633763, -72.229257, 66.150221, -67.796302, 35.375482, -69.524871, 93.678128, 21.821558, -22.690492, -2.348889, -39.817659, 41.327239, -89.850646, -68.205007]]');
+
+INSERT INTO model2_scaler (sequence_number, feature_means, feature_stds) VALUES
+    (1, '[34761.956359, 8.319046, 15690928.006623, 72.217129, 22680.496689]', '[22984.32931, 4.395646, 20583963.250286, 12.123008, 48816.522986]');
+
+INSERT INTO model2_encoder (sequence_number, categories) VALUES
+    (1, '[["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"]]');
 
 -- NGO tables (used by Diana's humanitarian coordinator routes)
 CREATE TABLE IF NOT EXISTS WorldNGOs (

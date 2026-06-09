@@ -166,23 +166,23 @@ st.markdown("""
 
 st.divider()
 
-st.markdown('<div class="section-header">Project Snapshot</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header">TERRA at a Glance</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("""
     <div class="snapshot-card">
-        <div class="snapshot-number">27</div>
-        <div class="snapshot-label">EU Member States</div>
+        <div class="snapshot-number">2</div>
+        <div class="snapshot-label">Predictive ML Models</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
     <div class="snapshot-card">
-        <div class="snapshot-number">3+</div>
-        <div class="snapshot-label">Data Sources</div>
+        <div class="snapshot-number">20+</div>
+        <div class="snapshot-label">Years of Historical Data</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -190,11 +190,11 @@ with col3:
     st.markdown("""
     <div class="snapshot-card">
         <div class="snapshot-number">3</div>
-        <div class="snapshot-label">User Personas</div>
+        <div class="snapshot-label">Data Sources</div>
     </div>
     """, unsafe_allow_html=True)
 
-st.caption("Data from Open-Meteo, Eurostat, and World Bank")
+st.caption("Powered by Open-Meteo, Eurostat, and World Bank datasets")
 
 st.divider()
 

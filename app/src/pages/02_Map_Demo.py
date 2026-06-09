@@ -69,16 +69,53 @@ st.caption(
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    gdp_per_capita = st.number_input("GDP per Capita", min_value=0.0, value=55000.0)
-    unemployment_rate = st.number_input("Unemployment Rate", min_value=0.0, max_value=100.0, value=5.5)
+    gdp_per_capita = st.number_input(
+        "GDP per Capita (USD $)",
+        min_value=0.0,
+        value=55000.0,
+        help="Values in current US dollars (USD), sourced from the World Bank."
+    )
+    unemployment_rate = st.number_input(
+        "Unemployment Rate (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=5.5,
+        step=0.1,
+    )
 
 with col2:
-    temp_mean = st.number_input("Average Temperature (°C)", value=12.0)
-    heatwave_days = st.number_input("Heatwave Days", min_value=0, value=0)
+    temp_mean = st.number_input(
+        "Average Temperature (°C)",
+        min_value=-89.0,
+        max_value=57.0,
+        value=12.0,
+        step=2.0,
+        format="%g",
+        help="Valid range: −89 °C to 57 °C (Earth's recorded extremes). Steps ±2 °C; you can type a decimal if needed."
+    )
+    heatwave_days = st.number_input(
+        "Heatwave Days",
+        min_value=0,
+        max_value=366,
+        value=0,
+        step=1,
+    )
 
 with col3:
-    precip_days_heavy = st.number_input("Heavy Precipitation Days", min_value=0, value=3)
-    dry_days = st.number_input("Dry Days", min_value=0, value=220)
+    precip_days_heavy = st.number_input(
+        "Heavy Precipitation Days",
+        min_value=0,
+        max_value=366,
+        value=3,
+        step=1,
+    )
+    dry_days = st.number_input(
+        "Dry Days",
+        min_value=0,
+        max_value=366,
+        value=220,
+        step=1,
+    )
 
 st.divider()
 

@@ -11,7 +11,7 @@ st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://web-api:4000"
-USER_ID  = 1  # Gabriel's seeded user_id
+USER_ID = st.session_state.get('user_id', 1)
 
 st.title("Compare Countries")
 

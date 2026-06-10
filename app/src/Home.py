@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 # import the main streamlit library as well
 # as SideBarLinks function from src/modules folder
 import streamlit as st
+import requests
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
@@ -200,32 +201,105 @@ st.divider()
 
 st.markdown('<div class="section-header">Choose a user persona to enter the app</div>', unsafe_allow_html=True)
 
-if st.button("Act as Gabriel, a Political Analyst",
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'policy_analyst'
-    st.session_state['first_name'] = 'Gabriel'
-    logger.info("Logging in as Gabriel Policy Analyst Persona")
-    st.switch_page('pages/00_Policy_Analyst_Home.py')
+# --- Fetch users from DB ---
+def fetch_users(role_name):
+    try:
+        r = requests.get(f"http://web-api:4000/users/by-role/{role_name}", timeout=5)
+        if r.status_code == 200:
+            return r.json()  # list of {user_id, display_name, email}
+    except Exception:
+        pass
+    return []
 
-if st.button('Act as Diana, a Humanitarian Coordinator',
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'humanitarian_coordinator'
-    st.session_state['first_name'] = 'Diana'
-    logger.info("Logging in as Diana Humanitarian Coordinator Persona")
-    st.switch_page('pages/01_Humanitarian_Coordinator_Home.py')
+analysts     = fetch_users("policy_analyst")
+coordinators = fetch_users("humanitarian_coordinator")
+students     = fetch_users("student_user")
 
-if st.button('Act as Mohammed, a Climate-Displaced Student',
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'student_user'
-    st.session_state['first_name'] = 'Mohammed'
-    logger.info("Logging in as Mohammed Student Persona")
-    st.switch_page('pages/20_Mohammed_Home.py')
+def names(users):
+    return [u["display_name"] for u in users]
+
+def find_user(users, display_name):
+    for u in users:
+        if u["display_name"] == display_name:
+            return u
+    return None
+
+# Reset helpers — picking from one dropdown clears the other two
+def on_analyst_change():
+    if st.session_state["analyst_select"] is not None:
+        st.session_state["coordinator_select"] = None
+        st.session_state["student_select"] = None
+
+def on_coordinator_change():
+    if st.session_state["coordinator_select"] is not None:
+        st.session_state["analyst_select"] = None
+        st.session_state["student_select"] = None
+
+def on_student_change():
+    if st.session_state["student_select"] is not None:
+        st.session_state["analyst_select"] = None
+        st.session_state["coordinator_select"] = None
+
+col1, col2, col3, col4 = st.columns([3, 3, 3, 1.5])
+
+with col1:
+    analyst_user = st.selectbox(
+        "🏛️ Policy Analyst",
+        options=[None] + names(analysts),
+        index=0,
+        format_func=lambda x: "Select user..." if x is None else x,
+        key="analyst_select",
+        on_change=on_analyst_change,
+    )
+
+with col2:
+    coordinator_user = st.selectbox(
+        "🤝 Humanitarian Coordinator",
+        options=[None] + names(coordinators),
+        index=0,
+        format_func=lambda x: "Select user..." if x is None else x,
+        key="coordinator_select",
+        on_change=on_coordinator_change,
+    )
+
+with col3:
+    student_user = st.selectbox(
+        "🎓 Climate-Displaced Student",
+        options=[None] + names(students),
+        index=0,
+        format_func=lambda x: "Select user..." if x is None else x,
+        key="student_select",
+        on_change=on_student_change,
+    )
+
+with col4:
+    st.markdown("<div style='margin-top:27px'></div>", unsafe_allow_html=True)
+    login_clicked = st.button("Log in →", type="primary", use_container_width=True)
+
+if login_clicked:
+    chosen = None
+    if analyst_user:
+        u = find_user(analysts, analyst_user)
+        chosen = (u, "policy_analyst", "pages/00_Policy_Analyst_Home.py")
+    elif coordinator_user:
+        u = find_user(coordinators, coordinator_user)
+        chosen = (u, "humanitarian_coordinator", "pages/01_Humanitarian_Coordinator_Home.py")
+    elif student_user:
+        u = find_user(students, student_user)
+        chosen = (u, "student_user", "pages/20_Mohammed_Home.py")
+
+    if chosen is None:
+        st.warning("Please select a user from one of the dropdowns before logging in.")
+    else:
+        u, role, page = chosen
+        st.session_state['authenticated'] = True
+        st.session_state['role'] = role
+        st.session_state['first_name'] = u["display_name"].split()[0]  # first name only
+        st.session_state['display_name'] = u["display_name"]
+        st.session_state['user_id'] = u["user_id"]
+        st.session_state['email'] = u["email"]
+        logger.info(f"Logging in as {u['display_name']} ({role})")
+        st.switch_page(page)
 
 
 

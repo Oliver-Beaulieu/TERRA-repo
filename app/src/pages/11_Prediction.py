@@ -10,10 +10,11 @@ st.set_page_config(layout='wide')
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
 
-st.title("Asylum Applications Prediction Model")
+st.title("Asylum Applications Prediction")
 st.write(
-    "This page uses TERRA's first machine learning model to predict asylum "
-    "applications based on climate and economic indicators."
+    "Given a country's economic and climate conditions, this model estimates "
+    "how many asylum applications that country is likely to receive. "
+    "Use this to understand which conditions drive displacement pressure."
 )
 
 st.divider()
@@ -158,8 +159,6 @@ if st.button("Predict Asylum Applications", type="primary", use_container_width=
                 unsafe_allow_html=True,
             )
 
-            st.write("### Model Inputs Used")
-            st.json(user_inputs)
 
         else:
             st.error("The prediction API returned an error.")

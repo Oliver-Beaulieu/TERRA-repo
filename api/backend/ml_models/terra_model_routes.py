@@ -17,7 +17,6 @@ terra_model_bp = Blueprint("terra_model", __name__)
 
 
 # Retrain TERRA Model 1 and store the new parameters in the database.
-# Example: POST /model1/train  (admin "Train Model 1" action)
 @terra_model_bp.route("/model1/train", methods=["POST"])
 def train_model1():
     current_app.logger.info("POST /model1/train")
@@ -36,7 +35,6 @@ def train_model1():
 
 
 # Predict asylum applications using TERRA Model 1
-# Example: POST /predict/asylum
 @terra_model_bp.route("/predict/asylum", methods=["POST"])
 def predict_asylum_applications():
     current_app.logger.info("POST /predict/asylum")
@@ -85,10 +83,8 @@ def predict_asylum_applications():
 
 
 # Bulk asylum risk predictions for all countries — used by the Risk Map.
-# Fetches the most recent available year's climate/economic data for every
-# country in the DB, runs Model 1 on each, and returns a risk-scored list.
-# Example: GET /predict/asylum-map          (uses latest year per country)
-#          GET /predict/asylum-map?year=2022 (uses a specific year)
+# GET /predict/asylum-map          (uses latest year per country)
+# GET /predict/asylum-map?year=2022 (uses a specific year)
 @terra_model_bp.route("/predict/asylum-map", methods=["GET"])
 def predict_asylum_map():
     current_app.logger.info("GET /predict/asylum-map")
@@ -182,14 +178,8 @@ def predict_asylum_map():
 
 
 # ── TERRA Model 2 ─────────────────────────────────────────────────────────────
-# Multivariate Linear Regression predicting three climate variables:
-#   heatwave_days, precip_days_heavy, dry_days
-# Inputs: gdp_per_capita, unemployment_rate, population, urban_pct,
-#         asylum_applications, country_code
 
-
-# Retrain TERRA Model 2 and store the new parameters in the database.
-# Example: POST /model2/train
+# TERRA Model 2 and store the new parameters in the database.
 @terra_model_bp.route("/model2/train", methods=["POST"])
 def train_model2():
     current_app.logger.info("POST /model2/train")
@@ -208,11 +198,6 @@ def train_model2():
 
 
 # Predict climate variables (heatwave_days, precip_days_heavy, dry_days)
-# for a single country-year using TERRA Model 2.
-# Example: POST /predict/climate
-# Body (JSON):
-#   { "country_code": "DE", "gdp_per_capita": 46000, "unemployment_rate": 3.1,
-#     "population": 83000000, "urban_pct": 77.4, "asylum_applications": 12000 }
 @terra_model_bp.route("/predict/climate", methods=["POST"])
 def predict_climate_variables():
     current_app.logger.info("POST /predict/climate")
@@ -248,9 +233,6 @@ def predict_climate_variables():
 
 
 # Bulk climate predictions for all countries — uses latest available year's
-# economic / asylum data per country from the DB.
-# Example: GET /predict/climate-map
-#          GET /predict/climate-map?year=2022
 @terra_model_bp.route("/predict/climate-map", methods=["GET"])
 def predict_climate_map():
     current_app.logger.info("GET /predict/climate-map")

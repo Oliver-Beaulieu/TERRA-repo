@@ -19,8 +19,9 @@ def about_page_nav():
 # ---- Role: pol_analyst ------------------------------------------------
 
 def policy_analyst_home_nav():
+    name = st.session_state.get('display_name', st.session_state.get('first_name', 'Home'))
     st.sidebar.page_link(
-        "pages/00_Policy_Analyst_Home.py", label="Gabriel Home", icon="🏠"
+        "pages/00_Policy_Analyst_Home.py", label=f"{name} — Home", icon="🏠"
     )
 
 
@@ -57,8 +58,9 @@ def saved_views_nav():
 # ---- Role: humanitarian_coordinator -----------------------------------------------------
 
 def humanitarian_coordinator_home_nav():
+    name = st.session_state.get('display_name', st.session_state.get('first_name', 'Home'))
     st.sidebar.page_link(
-        "pages/01_Humanitarian_Coordinator_Home.py", label="Diana Home", icon="🏠"
+        "pages/01_Humanitarian_Coordinator_Home.py", label=f"{name} — Home", icon="🏠"
     )
 
 
@@ -92,8 +94,9 @@ def export_country_summary_nav():
 # ---- Role: student_user ------------------------------------------------------
 
 def student_home_nav():
+    name = st.session_state.get('display_name', st.session_state.get('first_name', 'Home'))
     st.sidebar.page_link(
-        "pages/20_Mohammed_Home.py", label="Mohammed Home", icon="🏠"
+        "pages/20_Mohammed_Home.py", label=f"{name} — Home", icon="🏠"
     )
 
 

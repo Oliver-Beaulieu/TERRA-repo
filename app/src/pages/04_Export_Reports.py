@@ -9,7 +9,7 @@ from modules.nav import SideBarLinks
 st.set_page_config(layout='wide')
 SideBarLinks()
 
-USER_ID = 1 
+USER_ID = st.session_state.get('user_id', 1)
 
 STATUSES = ["Draft", "Under Review", "Active", "Archived"]
 

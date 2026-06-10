@@ -13,6 +13,7 @@ from backend.risk.risk_routes import risk_bp
 from backend.prediction.prediction_routes import prediction_bp
 from backend.views.view_routes import view_bp
 from backend.policy.policy_routes import policy_bp
+from backend.users.user_routes import user_bp
 
 
 def create_app():
@@ -53,5 +54,6 @@ def create_app():
     app.register_blueprint(view_bp)
     app.register_blueprint(terra_model_bp)
     app.register_blueprint(policy_bp)
+    app.register_blueprint(user_bp)
 
     return app

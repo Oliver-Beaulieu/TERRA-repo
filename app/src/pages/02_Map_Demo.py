@@ -19,7 +19,7 @@ st.write(
 
 API_BASE = "http://web-api:4000"
 
-# EU country centroids — lat/lon used by st.map
+# EU country — lat/lon used by st.map
 EU_COUNTRIES = {
     "AT": {"name": "Austria",      "lat": 47.52,  "lon": 14.55},
     "BE": {"name": "Belgium",      "lat": 50.50,  "lon": 4.47},
@@ -50,7 +50,7 @@ EU_COUNTRIES = {
     "SK": {"name": "Slovakia",     "lat": 48.67,  "lon": 19.70},
 }
 
-# RGBA color per risk level — used by st.map's color parameter
+# Color per risk level — used by st.map's color parameter
 RISK_COLORS = {
     "Low":      [26,  152, 80,  180],   # green
     "Medium":   [254, 224, 139, 200],   # yellow

@@ -22,9 +22,6 @@ st.divider()
 st.subheader("Enter country information")
 st.caption(
     "The model predicts from a country's economic and climate indicators. "
-    "It does not use calendar year, population, urbanization, total "
-    "precipitation, or evapotranspiration — those were removed during model "
-    "tuning (multicollinearity / out-of-range extrapolation)."
 )
 
 col1, col2, col3 = st.columns(3)
@@ -54,7 +51,6 @@ else:
 
 with col1:
     _country_label = st.selectbox("Country", _country_options)
-    # Extract the two-letter code from "Name (XX)"
     country_code = _country_label.split("(")[-1].rstrip(")")
 
     gdp_per_capita = st.number_input(
@@ -81,7 +77,7 @@ with col2:
         value=12.0,
         step=2.0,
         format="%g",
-        help="Steps ±2 °C; you can type a decimal if needed."
+        help="Range: −89 °C to 57 °C (Earth's recorded extremes). Steps ±2 °C; can type a decimal if needed."
     )
 
     heatwave_days = st.number_input(
@@ -142,7 +138,6 @@ if st.button("Predict Asylum Applications", type="primary", use_container_width=
     }
 
     # Use web-api when running in Docker.
-    # If running Streamlit locally outside Docker, use localhost instead.
     api_url = "http://web-api:4000/predict/asylum"
 
     try:

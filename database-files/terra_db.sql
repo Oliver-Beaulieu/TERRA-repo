@@ -766,14 +766,11 @@ CREATE TABLE IF NOT EXISTS Donors (
 
 
 INSERT INTO WorldNGOs (Name, Country, Founding_Year, Focus_Area, Website) VALUES
-('World Wildlife Fund', 'United States', 1961, 'Environmental Conservation', 'https://www.worldwildlife.org'),
 ('Doctors Without Borders', 'France', 1971, 'Medical Relief', 'https://www.msf.org'),
 ('Oxfam International', 'United Kingdom', 1995, 'Poverty and Inequality', 'https://www.oxfam.org'),
 ('Amnesty International', 'United Kingdom', 1961, 'Human Rights', 'https://www.amnesty.org'),
-('Save the Children', 'United States', 1919, 'Child Welfare', 'https://www.savethechildren.org'),
 ('Greenpeace', 'Netherlands', 1971, 'Environmental Protection', 'https://www.greenpeace.org'),
 ('International Red Cross', 'Switzerland', 1863, 'Humanitarian Aid', 'https://www.icrc.org'),
 ('CARE International', 'Switzerland', 1945, 'Global Poverty', 'https://www.care-international.org'),
-('Habitat for Humanity', 'United States', 1976, 'Affordable Housing', 'https://www.habitat.org'),
 ('Plan International', 'United Kingdom', 1937, 'Child Rights', 'https://plan-international.org');
 

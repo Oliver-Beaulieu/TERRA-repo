@@ -5,7 +5,7 @@ import logging
 
 from backend.db_connection import init_app as init_db
 from backend.simple.simple_routes import simple_routes
-from backend.ml_models.terra_model_routes import terra_model_bp
+from backend.prediction.terra_model_routes import terra_model_bp
 from backend.ngos.ngo_routes import ngo_bp
 from backend.countries.country_routes import country_bp
 from backend.climate.climate_routes import climate_bp

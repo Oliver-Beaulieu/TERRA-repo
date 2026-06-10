@@ -30,7 +30,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Go from api/backend/ml_models/terra_model_1.py back to the repo root
 ROOT_DIR = os.path.abspath(os.path.join(HERE, "..", ".."))
 
-DATA_PATH = os.path.join(ROOT_DIR, "datasets", "processed", "merged_data.csv")
 RESULTS_PATH = os.path.join(ROOT_DIR, "outputs", "results.csv")
 MODEL_PATH = os.path.join(ROOT_DIR, "outputs", "model_1.joblib")
 
@@ -60,11 +59,23 @@ NUMERIC_FEATURES = [
     "dry_days",
 ]
 
-def load_data(path=DATA_PATH):
-    """Load the merged dataset and drop rows with no target value."""
-    df = pd.read_csv(path)
+def load_data():
+    """Load training data from the database."""
+    from backend.db_connection import get_db
+    query = """
+        SELECT c.country_code, cyd.year,
+               cyd.gdp_per_capita, cyd.unemployment_rate, cyd.temp_mean,
+               cyd.heatwave_days, cyd.precip_days_heavy, cyd.dry_days,
+               cyd.asylum_applications
+        FROM country_year_data cyd
+        JOIN country c ON cyd.country_id = c.country_id
+        ORDER BY c.country_code, cyd.year
+    """
+    with get_db().cursor(dictionary=True) as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+    df = pd.DataFrame(rows)
     df = df.dropna(subset=["asylum_applications"]).copy()
-    df = df.sort_values(["country_code", "year"])
     return df
 
 
@@ -85,13 +96,12 @@ def prepare_data(df):
     df["log_asylum"] = np.log1p(df["asylum_applications"])
     return df, features
 
-def train_test_model(data_path=DATA_PATH, results_path=RESULTS_PATH,
-                     model_path=MODEL_PATH):
+def train_test_model(results_path=RESULTS_PATH, model_path=MODEL_PATH):
     """Train on <=2018, evaluate on >=2019.
 
     Returns a dict: fitted model, scaler, feature list, and metrics.
     """
-    df = load_data(data_path)
+    df = load_data()
     df, features = prepare_data(df)
     country_cols = [c for c in features if c.startswith("country_code_")]
 

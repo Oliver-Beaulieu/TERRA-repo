@@ -26,7 +26,6 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 
-DATA_PATH = os.path.join(ROOT_DIR, "datasets", "processed", "merged_data.csv")
 MODEL_PATH = os.path.join(ROOT_DIR, "outputs", "model_2_multi_linreg.joblib")
 
 numeric_features = ["gdp_per_capita", "unemployment_rate", "population", "urban_pct", "asylum_applications"]
@@ -35,10 +34,23 @@ categorical_features = ["country_code"]
 targets = ["heatwave_days", "precip_days_heavy", "dry_days"]
 
 
-def load_data(path=DATA_PATH):
-    df = pd.read_csv(path)
-    df = df.dropna(subset=targets).copy()
-    return df
+def load_data():
+    """Load training data from the database."""
+    from backend.db_connection import get_db
+    query = """
+        SELECT c.country_code, cyd.year,
+               cyd.gdp_per_capita, cyd.unemployment_rate,
+               cyd.population, cyd.urban_pct, cyd.asylum_applications,
+               cyd.heatwave_days, cyd.precip_days_heavy, cyd.dry_days
+        FROM country_year_data cyd
+        JOIN country c ON cyd.country_id = c.country_id
+        ORDER BY c.country_code, cyd.year
+    """
+    with get_db().cursor(dictionary=True) as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+    df = pd.DataFrame(rows)
+    return df.dropna(subset=targets).copy()
 
 
 def prepare_data(df):
@@ -62,9 +74,8 @@ def prepare_data(df):
     return X, y, model
 
 
-def train_test_model(data_path=DATA_PATH, model_path=MODEL_PATH,
-                     test_size=0.20, random_state=42):
-    df = load_data(data_path)
+def train_test_model(model_path=MODEL_PATH, test_size=0.20, random_state=42):
+    df = load_data()
     X, y, model = prepare_data(df)
 
     X_train, X_test, y_train, y_test = train_test_split(

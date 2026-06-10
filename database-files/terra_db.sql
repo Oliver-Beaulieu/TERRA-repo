@@ -386,6 +386,41 @@ INSERT INTO country (country_id, country_code, country_name) VALUES
     (26, 'SI', 'Slovenia'),
     (27, 'SK', 'Slovakia');
 
+-- RISK ASSESSMENT -- 2023 risk scores for all 27 EU countries
+-- Scores calculated using percentile ranking across 3 dimensions:
+--   climate     = percentile rank of (heatwave_days + dry_days + precip_days_heavy)
+--   asylum      = percentile rank of (asylum_applications / population)
+--   vulnerability = percentile rank of (1 / gdp_per_capita)
+-- Final score = average of 3 percentiles. Levels split into equal quartiles (0-25 Low, 26-50 Moderate, 51-75 High, 76-100 Critical)
+INSERT INTO risk_assessment (country_id, year, risk_score, risk_level, label_method, notes) VALUES
+    ( 1, 2023, 57.7,  'High',     'percentile', 'climate=61.5, asylum=96.2, vulnerability=15.4'),
+    ( 2, 2023, 30.8,  'Moderate', 'percentile', 'climate=3.8, asylum=69.2, vulnerability=19.2'),
+    ( 3, 2023, 83.33, 'Critical', 'percentile', 'climate=69.2, asylum=80.8, vulnerability=100.0'),
+    ( 4, 2023, 82.07, 'Critical', 'percentile', 'climate=100.0, asylum=100.0, vulnerability=46.2'),
+    ( 5, 2023, 33.33, 'Moderate', 'percentile', 'climate=34.6, asylum=7.7, vulnerability=57.7'),
+    ( 6, 2023, 51.28, 'High',     'percentile', 'climate=38.5, asylum=88.5, vulnerability=26.9'),
+    ( 7, 2023, 24.36, 'Low',      'percentile', 'climate=42.3, asylum=23.1, vulnerability=7.7'),
+    ( 8, 2023, 47.44, 'Moderate', 'percentile', 'climate=15.4, asylum=65.4, vulnerability=61.5'),
+    ( 9, 2023, 73.08, 'High',     'percentile', 'climate=96.2, asylum=73.1, vulnerability=50.0'),
+    (10, 2023, 33.33, 'Moderate', 'percentile', 'climate=30.8, asylum=38.5, vulnerability=30.8'),
+    (11, 2023, 46.15, 'Moderate', 'percentile', 'climate=46.2, asylum=57.7, vulnerability=34.6'),
+    (12, 2023, 85.9,  'Critical', 'percentile', 'climate=88.5, asylum=92.3, vulnerability=76.9'),
+    (13, 2023, 60.26, 'High',     'percentile', 'climate=65.4, asylum=26.9, vulnerability=88.5'),
+    (14, 2023, 46.15, 'Moderate', 'percentile', 'climate=53.8, asylum=0.0, vulnerability=84.6'),
+    (15, 2023, 24.36, 'Low',      'percentile', 'climate=7.7, asylum=61.5, vulnerability=3.8'),
+    (16, 2023, 57.69, 'High',     'percentile', 'climate=76.9, asylum=53.8, vulnerability=42.3'),
+    (17, 2023, 33.33, 'Moderate', 'percentile', 'climate=23.1, asylum=11.5, vulnerability=65.4'),
+    (18, 2023, 34.62, 'Moderate', 'percentile', 'climate=19.2, asylum=84.6, vulnerability=0.0'),
+    (19, 2023, 41.03, 'Moderate', 'percentile', 'climate=7.7, asylum=34.6, vulnerability=80.8'),
+    (20, 2023, 57.69, 'High',     'percentile', 'climate=92.3, asylum=42.3, vulnerability=38.5'),
+    (21, 2023, 20.51, 'Low',      'percentile', 'climate=0.0, asylum=50.0, vulnerability=11.5'),
+    (22, 2023, 46.15, 'Moderate', 'percentile', 'climate=26.9, asylum=19.2, vulnerability=92.3'),
+    (23, 2023, 56.41, 'High',     'percentile', 'climate=84.6, asylum=15.4, vulnerability=69.2'),
+    (24, 2023, 69.23, 'High',     'percentile', 'climate=80.8, asylum=30.8, vulnerability=96.2'),
+    (25, 2023, 39.74, 'Moderate', 'percentile', 'climate=50.0, asylum=46.2, vulnerability=23.1'),
+    (26, 2023, 67.95, 'High',     'percentile', 'climate=73.1, asylum=76.9, vulnerability=53.8'),
+    (27, 2023, 44.87, 'Moderate', 'percentile', 'climate=57.7, asylum=3.8, vulnerability=73.1');
+
 -- COUNTRY_YEAR_DATA -- cleaned yearly rows from merged_data.csv
 INSERT INTO country_year_data (country_id, year, gdp_per_capita, unemployment_rate, population, urban_pct, asylum_applications, temp_mean, heatwave_days, precip_total, precip_days_heavy, dry_days, evapotrans_total) VALUES
     (1, 2010, 46611.1393420232, 4.883, 8363404, 67.1047429254747, 11060, 9.422351, 0, 783.7, 7, 229, 759.994),

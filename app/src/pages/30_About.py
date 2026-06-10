@@ -51,7 +51,8 @@ with c1:
     st.caption("Hi, I’m Yadiel, a Computer Science and Economics student at Northeastern University. I hope TERRA helps make climate and displacement data easier to understand by showing how climate risks can significantly shape movement across Europe.")
     st.image("assets/Yadiel_Cruz.jpg", width=450)
     st.markdown("**Hamza Chakir**")
-    st.caption("Second-year CS student.")
+    st.caption("Hey I'm Hamza Chakir! I'm a second year Computer Science student at Northeastern University. I hope TERRA helps people better understand how climate change is forcing communities to move and inspires more awareness around the people affected by it.")
+    st.image("assets/hamza_photo.jpg", width=450)
 with c2:
     st.markdown("**Oliver Beaulieu**")
     st.caption("I'm a 4th year Computer Science and Cognitive Pyschology student at Northeastern University. I hope that TERRA is used to help create actionable plans to combat climate challanges that we see today.")

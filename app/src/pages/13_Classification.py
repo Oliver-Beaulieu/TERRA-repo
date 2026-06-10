@@ -1,65 +1,131 @@
 import logging
 logger = logging.getLogger(__name__)
+
+import requests
 import streamlit as st
 import pandas as pd
-from sklearn import datasets
-from sklearn.ensemble import RandomForestClassifier
 from modules.nav import SideBarLinks
 
 st.set_page_config(layout='wide')
-
 SideBarLinks()
 
-st.write("""
-# Simple Iris Flower Prediction App
+API_BASE = "http://web-api:4000"
+USER_ID  = st.session_state.get('user_id', 1)
 
-This example is borrowed from [The Data Professor](https://github.com/dataprofessor/streamlit_freecodecamp/tree/main/app_7_classification_iris)
-         
-This app predicts the **Iris flower** type!
-""")
+LEVEL_COLOR = {
+    "Low":      "🟢",
+    "Moderate": "🟡",
+    "High":     "🟠",
+    "Critical": "🔴",
+}
 
-st.sidebar.header('User Input Parameters')
+POLICY_TYPES = ["Emergency", "Preventive Measure", "Monitoring", "Funding Allocation", "Other"]
+STATUSES     = ["Draft", "Under Review", "Active", "Archived"]
 
-# Below, different user inputs are defined.  When you view the UI, 
-# notice that they are in the sidebar. 
-def user_input_features():
-    sepal_length = st.sidebar.slider('Sepal length', 4.3, 7.9, 5.4)
-    sepal_width = st.sidebar.slider('Sepal width', 2.0, 4.4, 3.4)
-    petal_length = st.sidebar.slider('Petal length', 1.0, 6.9, 1.3)
-    petal_width = st.sidebar.slider('Petal width', 0.1, 2.5, 0.2)
-    data = {'sepal_length': sepal_length,
-            'sepal_width': sepal_width,
-            'petal_length': petal_length,
-            'petal_width': petal_width}
-    features = pd.DataFrame(data, index=[0])
-    return features
+st.title("Risk Classification")
+st.write(
+    "Review climate-displacement risk levels across EU countries. "
+    "Filter by risk level and flag countries that need policy attention."
+)
 
-# get a data frame with the input features from the user
-df = user_input_features()
+st.divider()
 
-# show the exact values the user entered in a table.
-st.subheader('User Input parameters')
-st.write(df)
+#data 
+try:
+    r = requests.get(f"{API_BASE}/risk-classifications", timeout=5)
+    risks = r.json() if r.status_code == 200 else []
+except Exception:
+    risks = []
 
-# load the standard iris dataset and generate a 
-# random forest classifier 
-iris = datasets.load_iris()
-X = iris.data
-Y = iris.target
-clf = RandomForestClassifier()
+try:
+    r = requests.get(f"{API_BASE}/countries", timeout=5)
+    countries = r.json() if r.status_code == 200 else []
+except Exception:
+    countries = []
 
-# fit the model
-clf.fit(X, Y)
+if not risks:
+    st.warning("No risk data available. Make sure the backend is running.")
+    st.stop()
 
-# use the values entered by the user for prediction
-prediction = clf.predict(df)
-prediction_proba = clf.predict_proba(df)
+df = pd.DataFrame(risks)
 
-st.subheader('Class labels and their corresponding index number')
-st.write(iris.target_names)
+#latest year per country
+df = df.sort_values("year", ascending=False).drop_duplicates(subset="country_id")
 
-st.subheader('Prediction')
-st.write(iris.target_names[prediction])
+st.subheader("Filter by Risk Level")
+all_levels   = ["Low", "Moderate", "High", "Critical"]
+active_levels = st.multiselect(
+    "Show risk levels",
+    options=all_levels,
+    default=all_levels,
+    label_visibility="collapsed",
+)
 
-st.subheader('Prediction Probability')
-st.write(prediction_proba)
+filtered = df[df["risk_level"].isin(active_levels)].sort_values("risk_score", ascending=False)
+
+st.caption(f"Showing {len(filtered)} of {len(df)} countries")
+st.divider()
+
+# Risk table
+st.subheader("Country Risk Overview")
+
+if filtered.empty:
+    st.info("No countries in the filter.")
+else:
+    name_to_id = {c["country_name"]: c["country_id"] for c in countries}
+
+    for _, row in filtered.iterrows():
+        icon  = LEVEL_COLOR.get(row["risk_level"], "⚪")
+        label = f"{icon} {row['risk_level']}"
+
+        col_name, col_score, col_level, col_year, col_flag = st.columns([3, 1.5, 1.5, 1, 2])
+
+        col_name.markdown(f"**{row['country_name']}**")
+        col_score.metric("Risk Score", f"{float(row['risk_score']):.1f}")
+        col_level.markdown(f"<div style='padding-top:8px'>{label}</div>", unsafe_allow_html=True)
+        col_year.markdown(f"<div style='padding-top:8px; color:#888'>{int(row['year'])}</div>", unsafe_allow_html=True)
+
+        flag_key = f"flag_{row['country_id']}"
+        if col_flag.button("🚩 Flag for Policy", key=flag_key, use_container_width=True):
+            st.session_state[f"show_flag_{row['country_id']}"] = True
+
+        if st.session_state.get(f"show_flag_{row['country_id']}"):
+            with st.form(key=f"form_{row['country_id']}"):
+                st.markdown(f"**Flag: {row['country_name']}** — add a policy note")
+                note_title  = st.text_input("Note title", placeholder="e.g. Urgent review needed")
+                policy_type = st.selectbox("Type", POLICY_TYPES)
+                status      = st.selectbox("Status", STATUSES)
+                description = st.text_area("Description", placeholder="What action or observation prompted this flag?")
+                c1, c2      = st.columns(2)
+                submitted   = c1.form_submit_button("Save Note", use_container_width=True)
+                cancelled   = c2.form_submit_button("Cancel",    use_container_width=True)
+
+            if submitted:
+                if not note_title.strip() or not description.strip():
+                    st.error("Please fill in a title and description.")
+                else:
+                    country_id = name_to_id.get(row["country_name"])
+                    payload = {
+                        "country_id":  country_id,
+                        "name":        note_title.strip(),
+                        "policy_type": policy_type,
+                        "status":      status,
+                        "description": description.strip(),
+                        "created_by":  USER_ID,
+                    }
+                    try:
+                        resp = requests.post(f"{API_BASE}/policies", json=payload, timeout=5)
+                        if resp.status_code == 201:
+                            st.success(f"Policy note saved for {row['country_name']}.")
+                            st.session_state[f"show_flag_{row['country_id']}"] = False
+                            st.rerun()
+                        else:
+                            st.error("Failed to save note.")
+                    except Exception as e:
+                        st.error(f"Could not connect to API: {e}")
+
+            if cancelled:
+                st.session_state[f"show_flag_{row['country_id']}"] = False
+                st.rerun()
+
+        st.divider()

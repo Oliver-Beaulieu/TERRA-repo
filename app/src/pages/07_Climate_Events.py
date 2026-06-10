@@ -85,8 +85,8 @@ for name, data in country_data.items():
 st.divider()
 st.subheader("What could this mean for people living there?")
 st.write(
-    "The model estimates what climate conditions people are likely to keep experiencing. "
-    "Generally more heatwave days can mean higher health risks and displacement pressure. "
+    "The model estimates what conditions people are likely to keep experiencing. "
+    "More heatwave days tends to mean higher health risks and displacement pressure. "
     "More dry days could lead to water stress and food insecurity."
 )
 

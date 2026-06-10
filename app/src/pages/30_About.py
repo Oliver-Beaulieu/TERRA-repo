@@ -48,13 +48,14 @@ st.write("TERRA was built by four Computer Science students at Northeastern Univ
 c1, c2 = st.columns(2)
 with c1:
     st.markdown("**Yadiel Cruz**")
-    st.caption("Computer Science & Economics.")
+    st.caption("Hi, I’m Yadiel, a Computer Science and Economics student at Northeastern University. I hope TERRA helps make climate and displacement data easier to understand by showing how climate risks can significantly shape movement across Europe.")
+    st.image("assets/Yadiel_Cruz.jpg", width=450)
     st.markdown("**Hamza Chakir**")
     st.caption("Second-year CS student.")
 with c2:
     st.markdown("**Oliver Beaulieu**")
     st.caption("I'm a 4th year Computer Science and Cognitive Pyschology student at Northeastern University. I hope that TERRA is used to help create actionable plans to combat climate challanges that we see today.")
-    st.image("app/src/assets/oliver_photo.jpg")
+    st.image("assets/oliver_photo.jpg", width=450)
     st.markdown("**James Chan**")
     st.caption("Computer Science.")
 

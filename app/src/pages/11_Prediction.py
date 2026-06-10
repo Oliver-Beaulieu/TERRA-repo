@@ -57,22 +57,23 @@ with col1:
         "GDP per Capita (USD $)",
         min_value=0.0,
         value=55000.0,
-        help="Values in current US dollars (USD), sourced from the World Bank."
+        step=1000.0,
+        format="%g",
+        help="Values in current US dollars (USD), sourced from the World Bank. Max reasonable value: $200,000."
     )
 
     unemployment_rate = st.number_input(
         "Unemployment Rate (%)",
         min_value=0.0,
-        max_value=100.0,
         value=5.5,
-        step=0.1,
+        step=2.0,
+        format="%g",
+        help="Enter as a percentage (0–100). Steps ±2%; you can type a decimal if needed."
     )
 
 with col2:
     temp_mean = st.number_input(
         "Average Temperature (°C)",
-        min_value=-89.0,
-        max_value=57.0,
         value=12.0,
         step=2.0,
         format="%g",
@@ -82,31 +83,49 @@ with col2:
     heatwave_days = st.number_input(
         "Heatwave Days",
         min_value=0,
-        max_value=366,
         value=0,
-        step=1,
+        step=10,
     )
 
 with col3:
     precip_days_heavy = st.number_input(
         "Heavy Precipitation Days",
         min_value=0,
-        max_value=366,
         value=3,
-        step=1,
+        step=10,
     )
 
     dry_days = st.number_input(
         "Dry Days",
         min_value=0,
-        max_value=366,
         value=220,
-        step=1,
+        step=10,
     )
 
 st.divider()
 
 if st.button("Predict Asylum Applications", type="primary", use_container_width=True):
+
+    # ── Input validation ────────────────────────────────────────────────────
+    _errors = []
+    if not (-89.0 <= temp_mean <= 57.0):
+        _errors.append(f"Average Temperature must be between −89 °C and 57 °C (you entered {temp_mean} °C).")
+    if not (0.0 <= unemployment_rate <= 100.0):
+        _errors.append(f"Unemployment Rate must be between 0% and 100% (you entered {unemployment_rate}%).")
+    if gdp_per_capita > 200_000:
+        _errors.append(f"GDP per Capita seems unrealistically high — max is $200,000 USD (you entered ${gdp_per_capita:,.0f}).")
+    if heatwave_days > 366:
+        _errors.append(f"Heatwave Days cannot exceed 366 (you entered {heatwave_days}).")
+    if precip_days_heavy > 366:
+        _errors.append(f"Heavy Precipitation Days cannot exceed 366 (you entered {precip_days_heavy}).")
+    if dry_days > 366:
+        _errors.append(f"Dry Days cannot exceed 366 (you entered {dry_days}).")
+
+    if _errors:
+        for _e in _errors:
+            st.error(_e)
+        st.stop()
+    # ────────────────────────────────────────────────────────────────────────
 
     user_inputs = {
         "country_code": country_code,

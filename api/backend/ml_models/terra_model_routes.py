@@ -257,20 +257,14 @@ def predict_climate_map():
         else:
             query = """
                 SELECT c.country_name, c.country_code,
-                       cyd.year,
-                       cyd.gdp_per_capita, cyd.unemployment_rate,
-                       cyd.population, cyd.urban_pct, cyd.asylum_applications
+                    cyd.year,
+                    cyd.gdp_per_capita, cyd.unemployment_rate,
+                    cyd.population, cyd.urban_pct, cyd.asylum_applications
                 FROM country_year_data cyd
                 JOIN country c ON cyd.country_id = c.country_id
-                INNER JOIN (
-                    SELECT country_id, MAX(year) AS max_year
-                    FROM country_year_data
-                    WHERE gdp_per_capita    IS NOT NULL
-                      AND unemployment_rate IS NOT NULL
-                      AND population        IS NOT NULL
-                    GROUP BY country_id
-                ) latest ON cyd.country_id = latest.country_id
-                         AND cyd.year = latest.max_year
+                WHERE cyd.year = (
+                    SELECT MAX(year) FROM country_year_data
+                )
                 ORDER BY c.country_name
             """
             params = ()

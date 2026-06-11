@@ -13,6 +13,8 @@ from backend.prediction.prediction_routes import prediction_bp
 from backend.views.view_routes import view_bp
 from backend.policy.policy_routes import policy_bp
 from backend.users.user_routes import user_bp
+from backend.watchlist.watchlist_routes import watchlist_bp
+from backend.reports.report_routes import report_bp
 
 
 def create_app():
@@ -52,5 +54,7 @@ def create_app():
     app.register_blueprint(terra_model_bp, url_prefix="/models")
     app.register_blueprint(policy_bp,      url_prefix="/policy")
     app.register_blueprint(user_bp,        url_prefix="/users")
+    app.register_blueprint(watchlist_bp,   url_prefix="/watchlist")
+    app.register_blueprint(report_bp,      url_prefix="/reports")
 
     return app

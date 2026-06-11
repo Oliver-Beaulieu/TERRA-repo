@@ -199,3 +199,64 @@ if st.button("Generate Summary", type="primary", use_container_width=True):
         mime="text/csv",
         use_container_width=True,
     )
+
+    # Save the report to the database for this user
+    user_id = st.session_state.get("user_id")
+    if user_id:
+        report_payload = {
+            "country_id": country_id,
+            "user_id": user_id,
+            "report_title": f"{selected_name} — {selected_year}",
+            "report_text": df_export.to_csv(index=False),
+            "export_format": "CSV",
+        }
+        try:
+            save_resp = requests.post(f"{API_BASE}/reports", json=report_payload)
+            if save_resp.status_code == 201:
+                st.success("Report saved to your history.")
+            else:
+                st.warning("Summary generated but could not save to history.")
+        except requests.exceptions.RequestException:
+            st.warning("Summary generated but could not reach API to save history.")
+
+st.divider()
+
+# ── Saved report history ─────────────────────────────────────────────────────
+
+user_id = st.session_state.get("user_id")
+
+if user_id:
+    st.subheader("Saved Report History")
+
+    try:
+        history_resp = requests.get(f"{API_BASE}/reports", params={"user_id": user_id})
+        if history_resp.status_code == 200:
+            history = history_resp.json()
+        else:
+            history = []
+    except requests.exceptions.RequestException:
+        history = []
+
+    if not history:
+        st.write("No saved reports yet. Generate a summary above to create one.")
+    else:
+        for report in history:
+            col_title, col_del = st.columns([5, 1])
+
+            with col_title:
+                st.write(f"**{report['report_title']}**")
+                st.caption(f"Generated {report['generated_at']}  ·  Format: {report['export_format']}")
+
+            with col_del:
+                if st.button("Delete", key=f"del_report_{report['report_id']}"):
+                    try:
+                        del_resp = requests.delete(f"{API_BASE}/reports/{report['report_id']}")
+                        if del_resp.status_code == 200:
+                            st.success("Report deleted.")
+                            st.rerun()
+                        else:
+                            st.error("Could not delete report.")
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"Could not connect to the API: {e}")
+
+            st.markdown("---")

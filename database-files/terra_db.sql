@@ -185,35 +185,7 @@ CREATE TABLE IF NOT EXISTS saved_view_country (
     FOREIGN KEY (country_id)  REFERENCES country(country_id)  ON DELETE CASCADE  ON UPDATE CASCADE
 );
 
--- 11. NGO - Non-Governmental Organizations for Diana.
-CREATE TABLE IF NOT EXISTS ngo (
-    ngo_id INT NOT NULL AUTO_INCREMENT,
-    ngo_name VARCHAR(150) NOT NULL,
-    focus_area VARCHAR(100),
-    contact_email VARCHAR(150),
-    website VARCHAR(200),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-    created_by INT,
-    updated_by INT,
-    PRIMARY KEY (ngo_id),
-    FOREIGN KEY (created_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE,
-    FOREIGN KEY (updated_by)  REFERENCES users(user_id)      ON DELETE SET NULL  ON UPDATE CASCADE
-);
-
--- 12. NGO_COUNTRY - One NGO can operate in multiple countries. One country can have multiple NGOs.
-CREATE TABLE IF NOT EXISTS ngo_country (
-    ngo_id INT NOT NULL,
-    country_id INT NOT NULL,
-    operating_status VARCHAR(50) DEFAULT 'Active',
-    support_notes TEXT,
-    PRIMARY KEY (ngo_id, country_id),
-    FOREIGN KEY (ngo_id)      REFERENCES ngo(ngo_id)         ON DELETE CASCADE   ON UPDATE CASCADE,
-    FOREIGN KEY (country_id)  REFERENCES country(country_id) ON DELETE CASCADE   ON UPDATE CASCADE
-);
-
--- 13. WATCHLIST - Countries Mohammed wants to follow.
+-- 11. WATCHLIST - Countries Mohammed wants to follow.
 CREATE TABLE IF NOT EXISTS watchlist (
     watchlist_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,

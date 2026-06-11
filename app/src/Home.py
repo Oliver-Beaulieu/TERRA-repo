@@ -8,8 +8,6 @@ import logging
 logging.basicConfig(format='%(filename)s:%(lineno)s:%(levelname)s -- %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# import the main streamlit library as well
-# as SideBarLinks function from src/modules folder
 import streamlit as st
 import requests
 from modules.nav import SideBarLinks
@@ -20,27 +18,37 @@ st.session_state['authenticated'] = False
 
 SideBarLinks(show_home=True)
 
-# ***************************************************
-#    The major content of this page
-# ***************************************************
-
 logger.info("Loading the Home page of the app")
 
 st.markdown("""
 <style>
+    /* ── Global page background + text ───────────────── */
+    [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+        background-color: #0F1E33 !important;
+    }
+    /* default Streamlit text = white */
+    [data-testid="stAppViewContainer"] p,
+    [data-testid="stAppViewContainer"] label,
+    [data-testid="stAppViewContainer"] .stMarkdown p {
+        color: #F4F7FB !important;
+    }
+
     .terra-hero {
-        background: linear-gradient(135deg, #050c1a 0%, #0d1f3c 55%, #102b4a 100%);
-        border-radius: 16px;
-        padding: 48px 32px 40px 32px;
+        background:
+            radial-gradient(ellipse at 70% 50%, rgba(93,173,236,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse at 20% 80%, rgba(126,217,166,0.10) 0%, transparent 50%),
+            linear-gradient(135deg, #060f1e 0%, #0d1f3c 50%, #0f2a45 100%);
+        border-radius: 14px;
+        padding: 52px 32px 44px 32px;
         text-align: center;
         margin-bottom: 8px;
-        border: 1px solid #1a3a5c;
+        border: 1px solid #25415F;
     }
     .terra-title {
         font-size: 96px;
         font-weight: 900;
         letter-spacing: 16px;
-        color: #ffffff;
+        color: #F4F7FB;
         margin: 0;
         position: relative;
         display: inline-block;
@@ -58,12 +66,12 @@ st.markdown("""
         overflow: hidden;
     }
     .terra-title::before {
-        color: #3dba7e;
+        color: #7ED9A6;
         animation: glitch-top 7s infinite;
         clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
     }
     .terra-title::after {
-        color: #00cfff;
+        color: #5DADEC;
         animation: glitch-bot 7s infinite;
         clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%);
     }
@@ -106,14 +114,14 @@ st.markdown("""
         text-align: center;
     }
     .terra-subtitle {
-        font-size: 18px;
-        color: #7dd9b0;
+        font-size: 17px;
+        color: #7ED9A6 !important;
         letter-spacing: 3px;
         font-weight: 400;
         display: inline-block;
         overflow: hidden;
         white-space: nowrap;
-        border-right: 2px solid #3dba7e;
+        border-right: 2px solid #7ED9A6;
         max-width: 0px;
         animation: typewriter 6s steps(47, end) 1s infinite,
                    blink-cursor 0.75s step-end infinite;
@@ -127,33 +135,27 @@ st.markdown("""
     }
     @keyframes blink-cursor {
         from, to { border-color: transparent; }
-        50%      { border-color: #3dba7e; }
-    }
-    .snapshot-card {
-        background: #0d1530;
-        border-left: 5px solid #3dba7e;
-        border-radius: 10px;
-        padding: 20px 24px;
-        margin-bottom: 8px;
+        50%      { border-color: #7ED9A6; }
     }
     .snapshot-number {
-        font-size: 48px;
+        font-size: 44px;
         font-weight: 800;
-        color: #3dba7e;
+        color: #7ED9A6 !important;
         line-height: 1;
+        margin-bottom: 6px;
     }
     .snapshot-label {
-        font-size: 13px;
-        color: #8ab8a8;
-        margin-top: 4px;
-        letter-spacing: 1px;
+        font-size: 12px;
+        color: #7ED9A6 !important;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
     }
     .section-header {
-        font-size: 22px;
-        font-weight: 700;
-        color: #7dd9b0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #7ED9A6 !important;
         margin-bottom: 12px;
+        letter-spacing: 0.5px;
     }
 </style>
 
@@ -170,30 +172,12 @@ st.divider()
 st.markdown('<div class="section-header">TERRA at a Glance</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    st.markdown("""
-    <div class="snapshot-card">
-        <div class="snapshot-number">2</div>
-        <div class="snapshot-label">Predictive ML Models</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown('<div class="snapshot-number">2</div><div class="snapshot-label">Predictive ML Models</div>', unsafe_allow_html=True)
 with col2:
-    st.markdown("""
-    <div class="snapshot-card">
-        <div class="snapshot-number">20+</div>
-        <div class="snapshot-label">Years of Historical Data</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    st.markdown('<div class="snapshot-number">20+</div><div class="snapshot-label">Years of Historical Data</div>', unsafe_allow_html=True)
 with col3:
-    st.markdown("""
-    <div class="snapshot-card">
-        <div class="snapshot-number">3</div>
-        <div class="snapshot-label">Data Sources</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="snapshot-number">3</div><div class="snapshot-label">Data Sources</div>', unsafe_allow_html=True)
 
 st.caption("Powered by Open-Meteo, Eurostat, and World Bank datasets")
 
@@ -206,7 +190,7 @@ def fetch_users(role_name):
     try:
         r = requests.get(f"http://web-api:4000/users/by-role/{role_name}", timeout=5)
         if r.status_code == 200:
-            return r.json()  # list of {user_id, display_name, email}
+            return r.json()
     except Exception:
         pass
     return []
@@ -224,7 +208,6 @@ def find_user(users, display_name):
             return u
     return None
 
-# Reset helpers — picking from one dropdown clears the other two
 def on_analyst_change():
     if st.session_state["analyst_select"] is not None:
         st.session_state["coordinator_select"] = None
@@ -294,15 +277,9 @@ if login_clicked:
         u, role, page = chosen
         st.session_state['authenticated'] = True
         st.session_state['role'] = role
-        st.session_state['first_name'] = u["display_name"].split()[0]  # first name only
+        st.session_state['first_name'] = u["display_name"].split()[0]
         st.session_state['display_name'] = u["display_name"]
         st.session_state['user_id'] = u["user_id"]
         st.session_state['email'] = u["email"]
         logger.info(f"Logging in as {u['display_name']} ({role})")
         st.switch_page(page)
-
-
-
-
-
-

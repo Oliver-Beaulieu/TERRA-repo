@@ -27,7 +27,7 @@ with col1:
     st.write("Explore EU countries and their climate risk and displacement data.")
 
 with col2:
-    st.metric("Climate Indicators", "Temp, Precipitation, Heatwaves")
+    st.metric("Climate Indicators", "6 tracked")
     st.write("Understand how climate patterns relate to displacement pressure.")
 
 with col3:
@@ -61,3 +61,8 @@ with button_col2:
                  type="primary",
                  use_container_width=True):
         st.switch_page("pages/09_Similar_Countries.py")
+
+    if st.button("My Watchlist",
+                 type="primary",
+                 use_container_width=True):
+        st.switch_page("pages/21_My_Watchlist.py")

@@ -121,6 +121,12 @@ def similar_countries_nav():
         "pages/09_Similar_Countries.py", label="Similar Countries", icon="🔍"
     )
 
+
+def my_watchlist_nav():
+    st.sidebar.page_link(
+        "pages/21_My_Watchlist.py", label="My Watchlist", icon="⭐"
+    )
+
 # ---- Role: administrator ----------------------------------------------------
 
 def admin_home_nav():
@@ -147,13 +153,27 @@ def SideBarLinks(show_home=False):
 
     st.markdown("""
     <style>
-        [data-testid="stSidebar"] {
-            background-color: #112233 !important;
-            border-right: 2px solid #3dba7e !important;
-            box-shadow: 4px 0 18px rgba(61,186,126,0.25) !important;
+        [data-testid="stSidebar"],
+        [data-testid="stSidebar"] > div,
+        [data-testid="stSidebar"] > div:first-child,
+        section[data-testid="stSidebar"] {
+            background-color: #0d1f3c !important;
+            border-right: 1px solid #25415F !important;
+            box-shadow: 4px 0 16px rgba(0,0,0,0.4) !important;
         }
-        [data-testid="stSidebarContent"] {
-            background-color: #112233 !important;
+        [data-testid="stSidebarContent"],
+        [data-testid="stSidebarContent"] > div {
+            background-color: #0d1f3c !important;
+        }
+        [data-testid="stSidebarNavLink"] {
+            background-color: transparent !important;
+        }
+        [data-testid="stSidebarNavLink"]:hover {
+            background-color: rgba(126,217,166,0.1) !important;
+        }
+        [data-testid="stSidebarNavLink"][aria-selected="true"],
+        [data-testid="stSidebarNavLink"].active {
+            background-color: rgba(126,217,166,0.12) !important;
         }
         [data-testid="stSidebar"] img {
             width: 100% !important;
@@ -207,6 +227,7 @@ def SideBarLinks(show_home=False):
             climate_events_nav()
             displacement_timeline_nav()
             similar_countries_nav()
+            my_watchlist_nav()
 
         if st.session_state["role"] == "administrator":
             admin_home_nav()

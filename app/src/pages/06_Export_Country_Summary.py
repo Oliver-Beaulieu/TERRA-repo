@@ -13,10 +13,9 @@ st.set_page_config(layout='wide')
 SideBarLinks()
 
 st.title("Export Country Summary")
-st.write("### Generate a country-level humanitarian summary using TERRA Model 1")
 st.write(
-    "Select a country and year to pull its climate and economic data, "
-    "run it through the asylum applications prediction model, and export a summary."
+    "Select a country and year to view its recorded climate and economic indicators "
+    "alongside actual asylum application data, then export a CSV summary."
 )
 
 st.divider()
@@ -69,41 +68,13 @@ if st.button("Generate Summary", type="primary", use_container_width=True):
         st.warning(f"No data found for {selected_name} in {selected_year}. Try a different year.")
         st.stop()
 
-    # Build prediction payload
-    prediction_payload = {
-        "country_code": country_code,
-        "year": year_row["year"],
-        "gdp_per_capita": year_row.get("gdp_per_capita", 0),
-        "unemployment_rate": year_row.get("unemployment_rate", 0),
-        "population": year_row.get("population", 0),
-        "urban_pct": year_row.get("urban_pct", 0),
-        "temp_mean": year_row.get("temp_mean", 0),
-        "heatwave_days": year_row.get("heatwave_days", 0),
-        "precip_total": year_row.get("precip_total", 0),
-        "precip_days_heavy": year_row.get("precip_days_heavy", 0),
-        "dry_days": year_row.get("dry_days", 0),
-        "evapotrans_total": year_row.get("evapotrans_total", 0),
-    }
-
-    # Use real asylum data for past years, model prediction for future years
+    # All years are 2010-2023 so asylum data is always the recorded actual value
     actual_asylum = year_row.get("asylum_applications")
-    is_future = selected_year > 2023
-
-    if is_future or actual_asylum is None:
-        try:
-            pred_resp = requests.post(f"{API_BASE}/models/1/predict/asylum", json=prediction_payload)
-            if pred_resp.status_code == 200:
-                asylum_value = pred_resp.json()["prediction"]
-                asylum_label = "🔮 Predicted Asylum Applications"
-            else:
-                st.error(f"Prediction failed: {pred_resp.json().get('message', 'Unknown error')}")
-                st.stop()
-        except requests.exceptions.RequestException as e:
-            st.error(f"Could not reach prediction API: {e}")
-            st.stop()
-    else:
-        asylum_value = float(actual_asylum)
-        asylum_label = "📊 Asylum Applications (Actual)"
+    if actual_asylum is None:
+        st.warning(f"No asylum data recorded for {selected_name} in {selected_year}.")
+        st.stop()
+    asylum_value = float(actual_asylum)
+    asylum_label = "Asylum Applications (Recorded)"
 
     # Cast all numeric values safely
     def to_float(val, default=0):
@@ -175,7 +146,7 @@ if st.button("Generate Summary", type="primary", use_container_width=True):
         "Country Code": [country_code],
         "Year": [selected_year],
         "Asylum Applications": [round(asylum_value)],
-        "Asylum Data Type": ["Predicted" if is_future or actual_asylum is None else "Actual"],
+        "Asylum Data Type": ["Actual (Recorded)"],
         "GDP per Capita": [gdp],
         "Unemployment Rate (%)": [unemp],
         "Population": [pop],

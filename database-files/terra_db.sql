@@ -393,6 +393,115 @@ INSERT INTO risk_assessment (country_id, year, risk_score, risk_level, label_met
     (26, 2023, 67.95, 'High',     'percentile', 'climate=73.1, asylum=76.9, vulnerability=53.8'),
     (27, 2023, 44.87, 'Moderate', 'percentile', 'climate=57.7, asylum=3.8, vulnerability=73.1');
 
+-- POLICIES -- mock policy notes created by Gabriel (user_id=1) and other analysts
+INSERT INTO policies (country_id, name, policy_type, status, description, created_by) VALUES
+    (12, 'Greece Wildfire Displacement Review',      'Emergency',            'Active',       'Repeated wildfire seasons in 2021 and 2023 have displaced thousands in northern Greece. Recommending emergency resource allocation and coordination with local NGOs for temporary housing.',                     1),
+    (9,  'Spain Heatwave & Drought Assessment',      'Monitoring',           'Active',       'Spain recorded over 4,300 heat-related deaths in 2022 and severe drought conditions in 2023 affecting 25 million people. Ongoing monitoring of displacement pressure in southern regions.',                    1),
+    (4,  'Cyprus Climate Pressure Response',         'Preventive Measure',   'Under Review', 'Cyprus scored highest on climate percentile across all 27 EU members. Recommend proactive policy framework targeting coastal and agricultural communities most exposed to heat and water stress.',              5),
+    (3,  'Bulgaria Economic Vulnerability Plan',     'Funding Allocation',   'Active',       'Bulgaria ranks highest on economic vulnerability index. GDP per capita and limited social safety nets increase displacement risk. Proposing targeted EU funding for climate adaptation infrastructure.',        6),
+    (6,  'Germany Flood Infrastructure Audit',      'Preventive Measure',   'Archived',     'Following the 2021 Ahr Valley floods which caused 184 deaths, a full audit of flood defence infrastructure was completed. Findings submitted to the EU Civil Protection Mechanism.',                         7),
+    (16, 'Italy Heat and Drought Joint Response',    'Funding Allocation',   'Under Review', 'Italy experienced 2,500 heat-related deaths in summer 2022 alongside severe drought affecting 8 million people. Joint response plan under review with the Italian Civil Protection Department.',             8),
+    (23, 'Portugal Wildfire Prevention Strategy',   'Preventive Measure',   'Active',       'Portugal has recorded major wildfire events in 2017, 2018, 2022, and 2023. This note outlines a long-term prevention strategy including forest management reform and early warning systems.',                1);
+
+-- SAVED_VIEWS -- one view per policy analyst so every user sees data on login
+INSERT INTO saved_views (view_id, user_id, view_name, year_from, year_to) VALUES
+    ( 1,  1, 'Southern Europe Heat Crisis',    2018, 2023),
+    ( 2,  1, 'Eastern Europe Flood Watch',     2015, 2023),
+    ( 3,  5, 'Iberian Peninsula Overview',     2019, 2023),
+    ( 4,  6, 'Balkan Climate Trends',          2017, 2023),
+    ( 5,  7, 'Nordic Climate Watch',           2018, 2023),
+    ( 6,  8, 'Central Europe Comparison',      2016, 2023),
+    ( 7,  9, 'Mediterranean Risk Review',      2019, 2023),
+    ( 8, 10, 'Western Europe Overview',        2018, 2023),
+    ( 9, 11, 'High Asylum Countries',          2020, 2023),
+    (10, 12, 'Drought Affected Nations',       2019, 2023),
+    (11, 13, 'Flood Vulnerable Countries',     2017, 2023),
+    (12, 14, 'Critical Risk Spotlight',        2021, 2023),
+    (13, 15, 'Baltic States Monitor',          2018, 2023),
+    (14, 16, 'Southern Coastline Watch',       2019, 2023),
+    (15, 17, 'EU Border Countries',            2018, 2023),
+    (16, 18, 'Low GDP Vulnerability Check',    2020, 2023),
+    (17, 19, 'Displacement Pressure Zones',    2019, 2023),
+    (18, 20, 'Climate Leaders vs Laggards',    2018, 2023),
+    (19, 21, 'Wildfire Risk Countries',        2019, 2023),
+    (20, 22, 'Eastern Bloc Overview',          2017, 2023),
+    (21, 23, 'Heatwave Hotspots',              2019, 2023),
+    (22, 24, 'Atlantic Coast Nations',         2018, 2023),
+    (23, 25, 'High Vulnerability Index',       2020, 2023),
+    (24, 26, 'Recent Crisis Countries',        2021, 2023),
+    (25, 27, 'Northern Europe Baseline',       2018, 2023),
+    (26, 28, 'Southern Asylum Trends',         2019, 2023),
+    (27, 29, 'Central Flood Watch',            2016, 2023),
+    (28, 30, 'Iberian Drought Monitor',        2020, 2023),
+    (29, 31, 'Aegean Region Watch',            2019, 2023),
+    (30, 32, 'Cross-Region Comparison',        2018, 2023),
+    (31, 33, 'EU Risk Overview',               2020, 2023);
+
+-- SAVED_VIEW_COUNTRY -- countries linked to each saved view
+INSERT INTO saved_view_country (view_id, country_id) VALUES
+    -- 1: Southern Europe Heat Crisis: Spain, Greece, Italy, Portugal, Cyprus
+    (1, 9), (1, 12), (1, 16), (1, 23), (1, 4),
+    -- 2: Eastern Europe Flood Watch: Bulgaria, Romania, Hungary, Poland, Croatia
+    (2, 3), (2, 24), (2, 14), (2, 22), (2, 13),
+    -- 3: Iberian Peninsula: Spain, Portugal
+    (3, 9), (3, 23),
+    -- 4: Balkan Climate Trends: Greece, Bulgaria, Croatia, Romania, Slovenia
+    (4, 12), (4, 3), (4, 13), (4, 24), (4, 26),
+    -- 5: Nordic Climate Watch: Sweden, Finland, Denmark
+    (5, 25), (5, 10), (5, 7),
+    -- 6: Central Europe: Germany, Austria, Czechia, Slovakia
+    (6, 6), (6, 1), (6, 5), (6, 27),
+    -- 7: Mediterranean Risk Review: Greece, Italy, Spain, Cyprus, Malta
+    (7, 12), (7, 16), (7, 9), (7, 4), (7, 20),
+    -- 8: Western Europe: France, Germany, Netherlands, Belgium
+    (8, 11), (8, 6), (8, 21), (8, 2),
+    -- 9: High Asylum Countries: Germany, France, Spain, Austria
+    (9, 6), (9, 11), (9, 9), (9, 1),
+    -- 10: Drought Affected: Spain, Portugal, Italy
+    (10, 9), (10, 23), (10, 16),
+    -- 11: Flood Vulnerable: Germany, Belgium, Netherlands, Poland
+    (11, 6), (11, 2), (11, 21), (11, 22),
+    -- 12: Critical Risk Spotlight: Greece, Bulgaria, Cyprus
+    (12, 12), (12, 3), (12, 4),
+    -- 13: Baltic States: Estonia, Latvia, Lithuania
+    (13, 8), (13, 19), (13, 17),
+    -- 14: Southern Coastline: Greece, Italy, Spain, Portugal
+    (14, 12), (14, 16), (14, 9), (14, 23),
+    -- 15: EU Border Countries: Greece, Bulgaria, Romania, Croatia
+    (15, 12), (15, 3), (15, 24), (15, 13),
+    -- 16: Low GDP Vulnerability: Bulgaria, Romania, Hungary, Slovakia
+    (16, 3), (16, 24), (16, 14), (16, 27),
+    -- 17: Displacement Pressure: Greece, Germany, France, Spain
+    (17, 12), (17, 6), (17, 11), (17, 9),
+    -- 18: Climate Leaders vs Laggards: Sweden, Finland vs Cyprus, Greece
+    (18, 25), (18, 10), (18, 4), (18, 12),
+    -- 19: Wildfire Risk: Greece, Portugal, Spain, Italy
+    (19, 12), (19, 23), (19, 9), (19, 16),
+    -- 20: Eastern Bloc: Poland, Czechia, Slovakia, Hungary
+    (20, 22), (20, 5), (20, 27), (20, 14),
+    -- 21: Heatwave Hotspots: France, Spain, Italy, Greece, Portugal
+    (21, 11), (21, 9), (21, 16), (21, 12), (21, 23),
+    -- 22: Atlantic Coast: Ireland, France, Portugal, Spain
+    (22, 15), (22, 11), (22, 23), (22, 9),
+    -- 23: High Vulnerability: Bulgaria, Romania, Croatia, Latvia
+    (23, 3), (23, 24), (23, 13), (23, 19),
+    -- 24: Recent Crisis: Greece, Germany, Slovenia, Italy
+    (24, 12), (24, 6), (24, 26), (24, 16),
+    -- 25: Northern Europe Baseline: Sweden, Denmark, Finland, Netherlands
+    (25, 25), (25, 7), (25, 10), (25, 21),
+    -- 26: Southern Asylum Trends (Angelico): Spain, Greece, Italy, Cyprus
+    (26, 9), (26, 12), (26, 16), (26, 4),
+    -- 27: Central Flood Watch: Germany, Poland, Czechia, Austria
+    (27, 6), (27, 22), (27, 5), (27, 1),
+    -- 28: Iberian Drought Monitor: Spain, Portugal
+    (28, 9), (28, 23),
+    -- 29: Aegean Region Watch: Greece, Cyprus, Bulgaria
+    (29, 12), (29, 4), (29, 3),
+    -- 30: Cross-Region Comparison: France, Poland, Romania, Spain
+    (30, 11), (30, 22), (30, 24), (30, 9),
+    -- 31: EU Risk Overview: Greece, Spain, Italy, Bulgaria, Cyprus
+    (31, 12), (31, 9), (31, 16), (31, 3), (31, 4);
+
 -- COUNTRY_YEAR_DATA -- cleaned yearly rows from merged_data.csv
 INSERT INTO country_year_data (country_id, year, gdp_per_capita, unemployment_rate, population, urban_pct, asylum_applications, temp_mean, heatwave_days, precip_total, precip_days_heavy, dry_days, evapotrans_total) VALUES
     (1, 2010, 46611.1393420232, 4.883, 8363404, 67.1047429254747, 11060, 9.422351, 0, 783.7, 7, 229, 759.994),

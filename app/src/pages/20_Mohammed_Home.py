@@ -20,17 +20,13 @@ st.divider()
 
 st.subheader("Main Focus Areas")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
     st.metric("Countries Tracked", "27")
     st.write("Explore EU countries and their climate risk and displacement data.")
 
 with col2:
-    st.metric("Climate Indicators", "6 tracked")
-    st.write("Understand how climate patterns relate to displacement pressure.")
-
-with col3:
     st.metric("Displacement Data", "Timeline View")
     st.write("Track how asylum and displacement numbers have shifted over time.")
 

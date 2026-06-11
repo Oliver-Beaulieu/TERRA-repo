@@ -58,7 +58,8 @@ with c2:
     st.caption("I'm a 4th year Computer Science and Cognitive Pyschology student at Northeastern University. I hope that TERRA is used to help create actionable plans to combat climate challanges that we see today.")
     st.image("assets/oliver_photo.jpg", width=450)
     st.markdown("**James Chan**")
-    st.caption("Computer Science.")
+    st.caption("I'm a first year Computer Science student at Northeastern University. I hope TERRA makes it easier to get people the help they need after being displaced by climate events")
+    st.image("assets/james_photo.jpg", width=450)
 
 st.divider()
 st.caption("Summer 2026 · Data and Software in International Government and Politics Dialogue of Civilizations · Northeastern University")

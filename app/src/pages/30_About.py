@@ -54,7 +54,7 @@ with c1:
 with c2:
     st.markdown("**Oliver Beaulieu**")
     st.caption("I'm a 4th year Computer Science and Cognitive Pyschology student at Northeastern University. I hope that TERRA is used to help create actionable plans to combat climate challanges that we see today.")
-    st.image("app/src/assets/oliver_photo.jpg")
+    st.image("assets/oliver_photo.jpg")
     st.markdown("**James Chan**")
     st.caption("Computer Science.")
 

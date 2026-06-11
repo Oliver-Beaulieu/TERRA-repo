@@ -91,7 +91,7 @@ if st.button("Generate Summary", type="primary", use_container_width=True):
 
     if is_future or actual_asylum is None:
         try:
-            pred_resp = requests.post(f"{API_BASE}/predict/asylum", json=prediction_payload)
+            pred_resp = requests.post(f"{API_BASE}/models/1/predict/asylum", json=prediction_payload)
             if pred_resp.status_code == 200:
                 asylum_value = pred_resp.json()["prediction"]
                 asylum_label = "🔮 Predicted Asylum Applications"

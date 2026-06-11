@@ -7,7 +7,7 @@ view_bp = Blueprint("views", __name__)
 
 
 # Get all saved views for a user
-@view_bp.route("/saved-views", methods=["GET"])
+@view_bp.route("/", methods=["GET"])
 def get_saved_views():
     current_app.logger.info("GET /saved-views")
     try:
@@ -38,7 +38,7 @@ def get_saved_views():
 
 
 # Get one saved view and its countries
-@view_bp.route("/saved-views/<int:view_id>", methods=["GET"])
+@view_bp.route("/<int:view_id>", methods=["GET"])
 def get_saved_view(view_id):
     current_app.logger.info(f"GET /saved-views/{view_id}")
     try:
@@ -70,7 +70,7 @@ def get_saved_view(view_id):
 
 
 # Create a new saved view
-@view_bp.route("/saved-views", methods=["POST"])
+@view_bp.route("/", methods=["POST"])
 def create_saved_view():
     current_app.logger.info("POST /saved-views")
     try:
@@ -114,7 +114,7 @@ def create_saved_view():
 
 
 # Update a saved view
-@view_bp.route("/saved-views/<int:view_id>", methods=["PUT"])
+@view_bp.route("/<int:view_id>", methods=["PUT"])
 def update_saved_view(view_id):
     current_app.logger.info(f"PUT /saved-views/{view_id}")
     try:
@@ -157,7 +157,7 @@ def update_saved_view(view_id):
 
 
 # Delete a saved view
-@view_bp.route("/saved-views/<int:view_id>", methods=["DELETE"])
+@view_bp.route("/<int:view_id>", methods=["DELETE"])
 def delete_saved_view(view_id):
     current_app.logger.info(f"DELETE /saved-views/{view_id}")
     try:

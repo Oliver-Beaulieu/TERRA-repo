@@ -4,7 +4,7 @@ from backend.db_connection import get_db
 user_bp = Blueprint('users', __name__)
 
 
-@user_bp.route('/users/by-role/<role_name>', methods=['GET'])
+@user_bp.route('/by-role/<role_name>', methods=['GET'])
 def get_users_by_role(role_name):
     """Return all active users for a given role name (e.g. policy_analyst)."""
     try:

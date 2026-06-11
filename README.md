@@ -16,7 +16,7 @@ TERRA is a web app that links **climate, economic, and asylum data** for the 27 
 - **"Find similar countries"** — surface countries facing climate/displacement pressures like your own.
 - **NGO directory** — browse, filter, add, and view profiles for humanitarian organizations.
 - **Saved views & report exports** — save country comparisons and export summaries/reports.
-- **Role-based dashboards (RBAC)** — three personas (Policy Analyst, Humanitarian Coordinator, Climate-Displaced Student) each see only the tools relevant to them, plus an Administrator role for model management/retraining.
+- **Role-based dashboards (RBAC)** — three personas (Policy Analyst, Humanitarian Coordinator, Climate-Displaced Student) each see only the tools relevant to them.
 
 ## Getting Started
 

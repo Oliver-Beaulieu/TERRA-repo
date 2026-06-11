@@ -10,7 +10,7 @@ SideBarLinks()
 
 API_BASE = "http://web-api:4000"
 
-st.title("Priority Countries")
+st.title("Priority Risk Countries")
 st.write(
     "Countries flagged for immediate humanitarian attention based on climate pressure, "
     "asylum volume, and economic vulnerability."
@@ -19,7 +19,7 @@ st.divider()
 
 # fetch risk data
 try:
-    r = requests.get(f"{API_BASE}/risk-classifications", timeout=5)
+    r = requests.get(f"{API_BASE}/risk/classifications", timeout=5)
     risks = r.json() if r.status_code == 200 else []
 except Exception:
     risks = []
@@ -46,11 +46,11 @@ def parse_notes(notes):
             comp[k.strip()] = float(v.strip())
     return comp
 
-# return whichever component (climate / asylum / vulnerability) scored highest
+# return whichever component scored highest
 DRIVER_LABELS = {
-    "climate":       "🌡️ Climate Pressure",
-    "asylum":        "🧳 Asylum Volume",
-    "vulnerability": "📉 Economic Vulnerability",
+    "climate":       "Climate Pressure",
+    "asylum":        "Asylum Volume",
+    "vulnerability": "Economic Vulnerability",
 }
 
 def top_driver(comp):
@@ -62,7 +62,7 @@ def top_driver(comp):
 def score_bar(value, color):
     pct = min(int(value), 100)
     return (
-        f"<div style='background:#e0e0e0;border-radius:4px;height:10px;width:100%;margin-top:3px'>"
+        f"<div style='background:#2e4a63;border-radius:4px;height:10px;width:100%;margin-top:3px'>"
         f"<div style='background:{color};width:{pct}%;height:10px;border-radius:4px'></div>"
         f"</div>"
     )
@@ -72,9 +72,17 @@ COLORS = {"climate": "#e05c2a", "asylum": "#3a7abf", "vulnerability": "#8b5cf6"}
 critical = [r for r in rows if r.get("risk_level") == "Critical"]
 high     = [r for r in rows if r.get("risk_level") == "High"]
 
+# ── legend ────────────────────────────────────────────────────────────────────
+st.caption(
+    "Scores are percentile rankings from 0 to 100 across all 27 EU countries. "
+    "A higher score means more pressure in that category relative to other countries. "
+    "Countries are ranked by overall risk — #1 is the highest."
+)
+st.write("")
+
 # ── Critical cards ────────────────────────────────────────────────────────────
 if critical:
-    st.subheader("🔴 Critical — Immediate Attention Needed")
+    st.subheader("Critical — Immediate Attention Needed")
     st.caption(f"{len(critical)} {'country' if len(critical) == 1 else 'countries'} at critical risk")
     st.write("")
 
@@ -83,14 +91,18 @@ if critical:
     for i, row in enumerate(critical):
         comp  = parse_notes(row.get("notes"))
         score = float(row.get("risk_score") or 0)
+        rank  = i + 1  # i starts at 0 so rank 1 = highest
 
         with cols[i % len(cols)]:
             st.markdown(
                 f"""
-                <div style='border:2px solid #e05c2a;border-radius:10px;padding:18px 16px;background:#fff8f5'>
-                    <div style='font-size:1.25rem;font-weight:700'>{row['country_name']}</div>
-                    <div style='font-size:2rem;font-weight:800;color:#e05c2a'>{score:.1f}<span style='font-size:1rem;color:#888'>/100</span></div>
-                    <div style='font-size:0.8rem;color:#555;margin-bottom:10px'>Main driver: <strong>{top_driver(comp)}</strong></div>
+                <div style='border:2px solid #e05c2a;border-radius:10px;padding:18px 16px;background:#1e3a58;position:relative'>
+                    <div style='position:absolute;top:12px;right:12px;background:#e05c2a;color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px'>
+                        #{rank} Priority
+                    </div>
+                    <div style='font-size:1.25rem;font-weight:700;color:#eaf3fb'>{row['country_name']}</div>
+                    <div style='font-size:2rem;font-weight:800;color:#e05c2a'>{score:.1f}<span style='font-size:1rem;color:#eaf3fb'>/100</span></div>
+                    <div style='font-size:0.8rem;color:#eaf3fb;margin-bottom:10px'>Main driver: <strong>{top_driver(comp)}</strong></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -100,7 +112,7 @@ if critical:
             for key, label in [("climate", "Climate"), ("asylum", "Asylum"), ("vulnerability", "Vulnerability")]:
                 if key in comp:
                     st.markdown(
-                        f"<span style='font-size:0.75rem;color:#444'>{label}: <strong>{comp[key]:.0f}</strong></span>"
+                        f"<span style='font-size:0.75rem;color:#eaf3fb'>{label}: <strong>{comp[key]:.0f}th percentile</strong></span>"
                         + score_bar(comp[key], COLORS[key]),
                         unsafe_allow_html=True,
                     )
@@ -110,25 +122,27 @@ if critical:
 
 # ── High rows ─────────────────────────────────────────────────────────────────
 if high:
-    st.subheader("🟠 High — Monitor Closely")
+    st.subheader("High — Monitor Closely")
     st.caption(f"{len(high)} countries at high risk")
     st.write("")
 
-    for row in high:
+    # rank continues from where critical left off
+    for i, row in enumerate(high):
         comp  = parse_notes(row.get("notes"))
         score = float(row.get("risk_score") or 0)
+        rank  = len(critical) + i + 1
 
         c1, c2, c3, c4 = st.columns([3, 1.5, 2, 3])
-        c1.markdown(f"**{row['country_name']}**")
+        c1.markdown(f"**#{rank} {row['country_name']}**")
         c2.markdown(f"<span style='font-size:1.1rem;font-weight:700;color:#d97706'>{score:.1f}</span>", unsafe_allow_html=True)
-        c3.markdown(f"<span style='font-size:0.8rem;color:#555'>{top_driver(comp)}</span>", unsafe_allow_html=True)
+        c3.markdown(f"<span style='font-size:0.8rem;color:#eaf3fb'>{top_driver(comp)}</span>", unsafe_allow_html=True)
 
         bar_html = ""
         for key, color in COLORS.items():
             if key in comp:
                 bar_html += (
                     f"<div style='display:inline-block;width:30%;margin-right:2%'>"
-                    f"<div style='font-size:0.65rem;color:#777'>{key.title()[:4]} {comp[key]:.0f}</div>"
+                    f"<div style='font-size:0.65rem;color:#eaf3fb'>{key.title()[:4]} {comp[key]:.0f}</div>"
                     + score_bar(comp[key], color) +
                     f"</div>"
                 )

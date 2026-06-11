@@ -10,7 +10,7 @@ from modules.nav import SideBarLinks
 st.set_page_config(layout="wide")
 SideBarLinks()
 
-st.title("EU Asylum Risk Map")
+st.title("Predictive Risk Map")
 st.write(
     "Enter scenario conditions below. TERRA **Model 1** (Linear Regression) "
     "predicts asylum applications for every EU country — dots on the map are "
@@ -159,7 +159,7 @@ if st.button("Run Risk Map", type="primary", use_container_width=True):
         for i, (code2, info) in enumerate(EU_COUNTRIES.items()):
             payload = {"country_code": code2, **scenario}
             try:
-                r = requests.post(f"{API_BASE}/predict/asylum", json=payload, timeout=15)
+                r = requests.post(f"{API_BASE}/models/1/predict/asylum", json=payload, timeout=15)
                 pred = r.json()["prediction"] if r.status_code == 200 else 0
             except requests.exceptions.RequestException:
                 pred = 0

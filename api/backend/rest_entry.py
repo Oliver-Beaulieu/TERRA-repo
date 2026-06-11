@@ -4,7 +4,6 @@ import os
 import logging
 
 from backend.db_connection import init_app as init_db
-from backend.simple.simple_routes import simple_routes
 from backend.prediction.terra_model_routes import terra_model_bp
 from backend.ngos.ngo_routes import ngo_bp
 from backend.countries.country_routes import country_bp
@@ -43,17 +42,15 @@ def create_app():
 
     # Register the routes from each Blueprint with the app object
     # and give a url prefix to each.
-    # simple_routes has no prefix intentionally — it serves root-level demo routes (/, /playlist, etc.)
     app.logger.info("create_app(): registering blueprints")
-    app.register_blueprint(simple_routes)
-    app.register_blueprint(ngo_bp, url_prefix="/ngo")
-    app.register_blueprint(country_bp, url_prefix="/countries")
-    app.register_blueprint(climate_bp)
-    app.register_blueprint(risk_bp)
-    app.register_blueprint(prediction_bp)
-    app.register_blueprint(view_bp)
-    app.register_blueprint(terra_model_bp)
-    app.register_blueprint(policy_bp)
-    app.register_blueprint(user_bp)
+    app.register_blueprint(ngo_bp,         url_prefix="/ngo")
+    app.register_blueprint(country_bp,     url_prefix="/countries")
+    app.register_blueprint(climate_bp,     url_prefix="/climate")
+    app.register_blueprint(risk_bp,        url_prefix="/risk")
+    app.register_blueprint(prediction_bp,  url_prefix="/prediction")
+    app.register_blueprint(view_bp,        url_prefix="/views")
+    app.register_blueprint(terra_model_bp, url_prefix="/models")
+    app.register_blueprint(policy_bp,      url_prefix="/policy")
+    app.register_blueprint(user_bp,        url_prefix="/users")
 
     return app

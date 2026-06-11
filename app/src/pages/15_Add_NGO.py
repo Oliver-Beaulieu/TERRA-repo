@@ -85,12 +85,14 @@ if country_choice != "Other (specify)" and country_choice in name_to_country:
         rows = []
 
     if rows:
-        df = pd.DataFrame(rows)
-        st.caption(f"📍 Climate snapshot for {country_choice}")
+        # sort by year and take the most recent row
+        latest = sorted(rows, key=lambda x: x.get("year", 0))[-1]
+        year   = latest.get("year", "N/A")
+        st.caption(f"Climate indicators for {country_choice} — {year} (most recent recorded year)")
         m1, m2, m3 = st.columns(3)
-        m1.metric("Avg Heatwave Days",      f"{df['heatwave_days'].mean():.1f} /yr")
-        m2.metric("Avg Heavy Rainfall Days", f"{pd.to_numeric(df['precip_days_heavy'], errors='coerce').mean():.1f} /yr")
-        m3.metric("Avg Dry Days",           f"{df['dry_days'].mean():.0f} /yr")
+        m1.metric("Heatwave Days",      f"{int(latest.get('heatwave_days') or 0)} days")
+        m2.metric("Heavy Rainfall Days", f"{int(latest.get('precip_days_heavy') or 0)} days")
+        m3.metric("Dry Days",           f"{int(latest.get('dry_days') or 0)} days")
 
 st.divider()
 

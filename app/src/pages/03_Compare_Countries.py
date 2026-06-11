@@ -214,7 +214,7 @@ if c1.button("💾  Save View", use_container_width=True):
         "country_ids": country_ids,
     }
     try:
-        resp = requests.post(f"{API_BASE}/saved-views", json=payload, timeout=5)
+        resp = requests.post(f"{API_BASE}/views", json=payload, timeout=5)
         if resp.status_code == 201:
             st.toast("✅ Saved to your views.")
         else:

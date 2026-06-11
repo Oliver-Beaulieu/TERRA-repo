@@ -15,9 +15,9 @@ showSidebarNavigation = false
 [theme]
 base="dark"
 primaryColor="#3dba7e"
-backgroundColor="#080e1f"
-secondaryBackgroundColor="#112233"
-textColor="#dce8f0"
+backgroundColor="#152840"
+secondaryBackgroundColor="#1e3a58"
+textColor="#eaf3fb"
 font="monospace"
 
 [server]

@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import requests
 import streamlit as st
 from modules.nav import SideBarLinks
 
@@ -17,6 +18,30 @@ st.write(
     "and support policy decisions related to climate risk and refugee asylum across Europe."
 )
 
+API_BASE = "http://web-api:4000"
+
+# fetch active policy notes count
+try:
+    r = requests.get(f"{API_BASE}/policy", timeout=5)
+    policies = r.json() if r.status_code == 200 else []
+    active_notes = sum(1 for p in policies if p.get("status") == "Active")
+except Exception:
+    active_notes = "—"
+
+# fetch count of Critical countries from risk classifications
+try:
+    r = requests.get(f"{API_BASE}/risk/classifications", timeout=5)
+    risks = r.json() if r.status_code == 200 else []
+    # get the latest year per country then count Critical ones
+    seen = {}
+    for row in risks:
+        cid = row["country_id"]
+        if cid not in seen or row["year"] > seen[cid]["year"]:
+            seen[cid] = row
+    critical_count = sum(1 for row in seen.values() if row.get("risk_level") == "Critical")
+except Exception:
+    critical_count = "—"
+
 st.divider()
 
 st.subheader("Main Focus")
@@ -25,14 +50,15 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric("Countries Tracked", "27")
-    st.write("Compare EU countries using climate and displacement")
+    st.write("Compare EU countries using climate and displacement data.")
 
 with col2:
-    st.metric("Risk Review", "...")
-    st.write("Review risk levels to identify countries that may need policy attention.")
+    st.metric("Active Policy Notes", active_notes)
+    st.write("Policy notes flagged across EU countries currently marked active.")
 
 with col3:
-    st.metric("Model Output", "...")
+    st.metric("Critical Countries", critical_count)
+    st.write("Countries currently at the highest risk level across all three indicators.")
 st.divider()
 
 st.subheader("Quick Actions")

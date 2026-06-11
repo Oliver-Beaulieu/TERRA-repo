@@ -138,7 +138,7 @@ if st.button("Predict Asylum Applications", type="primary", use_container_width=
     }
 
     # Use web-api when running in Docker.
-    api_url = "http://web-api:4000/predict/asylum"
+    api_url = "http://web-api:4000/models/1/predict/asylum"
 
     try:
         response = requests.post(api_url, json=user_inputs)

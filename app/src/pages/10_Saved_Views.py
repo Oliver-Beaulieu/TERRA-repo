@@ -27,7 +27,7 @@ def fetch_all_countries():
 
 def fetch_views():
     try:
-        r = requests.get(f"{API_BASE}/saved-views", params={"user_id": USER_ID}, timeout=5)
+        r = requests.get(f"{API_BASE}/views", params={"user_id": USER_ID}, timeout=5)
         if r.status_code == 200:
             return r.json()
     except Exception:
@@ -37,7 +37,7 @@ def fetch_views():
 
 def fetch_view_detail(view_id):
     try:
-        r = requests.get(f"{API_BASE}/saved-views/{view_id}", timeout=5)
+        r = requests.get(f"{API_BASE}/views/{view_id}", timeout=5)
         if r.status_code == 200:
             return r.json()
     except Exception:
@@ -79,7 +79,7 @@ else:
 
             if del_col.button("✕", key=f"del_{i}", use_container_width=True):
                 try:
-                    requests.delete(f"{API_BASE}/saved-views/{view['view_id']}", timeout=5)
+                    requests.delete(f"{API_BASE}/views/{view['view_id']}", timeout=5)
                 except Exception:
                     pass
                 st.rerun()
@@ -118,7 +118,7 @@ else:
                     }
                     try:
                         resp = requests.put(
-                            f"{API_BASE}/saved-views/{view['view_id']}",
+                            f"{API_BASE}/views/{view['view_id']}",
                             json=payload, timeout=5
                         )
                         if resp.status_code == 200:
@@ -162,7 +162,7 @@ with st.form("new_view_form", clear_on_submit=True):
                 "country_ids": country_ids,
             }
             try:
-                resp = requests.post(f"{API_BASE}/saved-views", json=payload, timeout=5)
+                resp = requests.post(f"{API_BASE}/views", json=payload, timeout=5)
                 if resp.status_code == 201:
                     st.success(f"View \"{view_name_input.strip()}\" saved!")
                     st.rerun()

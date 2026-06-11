@@ -105,7 +105,7 @@ if st.button("Show Climate Estimates", type="primary", use_container_width=True)
         }
 
         try:
-            r = requests.post("http://web-api:4000/predict/climate", json=user_inputs)
+            r = requests.post("http://web-api:4000/models/2/predict/climate", json=user_inputs)
             if r.status_code == 200:
                 preds = r.json().get("predictions")
                 with col:

@@ -7,7 +7,7 @@ climate_bp = Blueprint("climate", __name__)
 
 
 # Get climate events for one country
-@climate_bp.route("/countries/<int:country_id>/climate-events", methods=["GET"])
+@climate_bp.route("/<int:country_id>/events", methods=["GET"])
 def get_country_climate_events(country_id):
     current_app.logger.info(f"GET /countries/{country_id}/climate-events")
     try:

@@ -32,7 +32,7 @@ st.divider()
 
 #data 
 try:
-    r = requests.get(f"{API_BASE}/risk-classifications", timeout=5)
+    r = requests.get(f"{API_BASE}/risk/classifications", timeout=5)
     risks = r.json() if r.status_code == 200 else []
 except Exception:
     risks = []
@@ -114,7 +114,7 @@ else:
                         "created_by":  USER_ID,
                     }
                     try:
-                        resp = requests.post(f"{API_BASE}/policies", json=payload, timeout=5)
+                        resp = requests.post(f"{API_BASE}/policy", json=payload, timeout=5)
                         if resp.status_code == 201:
                             st.success(f"Policy note saved for {row['country_name']}.")
                             st.session_state[f"show_flag_{row['country_id']}"] = False

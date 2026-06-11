@@ -7,9 +7,9 @@ risk_bp = Blueprint("risk", __name__)
 
 
 # GET all risk classifications
-@risk_bp.route("/risk-classifications", methods=["GET"])
+@risk_bp.route("/classifications", methods=["GET"])
 def get_all_risk_classifications():
-    current_app.logger.info("GET /risk-classifications")
+    current_app.logger.info("GET /classifications")
     try:
         query = """
             SELECT r.risk_id, r.country_id, c.country_name, c.country_code,
@@ -28,9 +28,9 @@ def get_all_risk_classifications():
 
 
 #Update a country's risk classification for a specific year
-@risk_bp.route("/risk-classifications/<int:country_id>", methods=["PUT"])
+@risk_bp.route("/classifications/<int:country_id>", methods=["PUT"])
 def update_country_risk_classification(country_id):
-    current_app.logger.info(f"PUT /risk-classifications/{country_id}")
+    current_app.logger.info(f"PUT /classifications/{country_id}")
     try:
         data = request.get_json()
 

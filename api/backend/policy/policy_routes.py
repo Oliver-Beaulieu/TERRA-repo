@@ -7,7 +7,7 @@ policy_bp = Blueprint("policy", __name__)
 
 
 # Get all policies
-@policy_bp.route("/policies", methods=["GET"])
+@policy_bp.route("/", methods=["GET"])
 def get_policies():
     current_app.logger.info("GET /policies")
     try:
@@ -28,7 +28,7 @@ def get_policies():
 
 
 # Create a policy note
-@policy_bp.route("/policies", methods=["POST"])
+@policy_bp.route("/", methods=["POST"])
 def create_policy():
     current_app.logger.info("POST /policies")
     try:
@@ -60,7 +60,7 @@ def create_policy():
 
 
 # Update a policy note status
-@policy_bp.route("/policies/<int:policy_id>", methods=["PUT"])
+@policy_bp.route("/<int:policy_id>", methods=["PUT"])
 def update_policy(policy_id):
     current_app.logger.info(f"PUT /policies/{policy_id}")
     try:
@@ -80,7 +80,7 @@ def update_policy(policy_id):
 
 
 # Delete a policy note
-@policy_bp.route("/policies/<int:policy_id>", methods=["DELETE"])
+@policy_bp.route("/<int:policy_id>", methods=["DELETE"])
 def delete_policy(policy_id):
     current_app.logger.info(f"DELETE /policies/{policy_id}")
     try:
@@ -94,7 +94,7 @@ def delete_policy(policy_id):
 
 
 # Create a policy flag
-@policy_bp.route("/policy-flags", methods=["POST"])
+@policy_bp.route("/flags", methods=["POST"])
 def create_policy_flag():
     current_app.logger.info("POST /policy-flags")
     try:
@@ -128,7 +128,7 @@ def create_policy_flag():
 
 
 # Update a policy flag
-@policy_bp.route("/policy-flags/<int:flag_id>", methods=["PUT"])
+@policy_bp.route("/flags/<int:flag_id>", methods=["PUT"])
 def update_policy_flag(flag_id):
     current_app.logger.info(f"PUT /policy-flags/{flag_id}")
     try:
@@ -161,7 +161,7 @@ def update_policy_flag(flag_id):
 
 
 # Delete a policy flag
-@policy_bp.route("/policy-flags/<int:flag_id>", methods=["DELETE"])
+@policy_bp.route("/flags/<int:flag_id>", methods=["DELETE"])
 def delete_policy_flag(flag_id):
     current_app.logger.info(f"DELETE /policy-flags/{flag_id}")
     try:

@@ -65,12 +65,12 @@ def humanitarian_coordinator_home_nav():
 
 
 def risk_map_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Risk Map", icon="🗺️")
+    st.sidebar.page_link("pages/02_Map_Demo.py", label="Predictive Risk Map", icon="🗺️")
 
 
 def priority_countries_nav():
     st.sidebar.page_link(
-        "pages/05_Priority_Countries.py", label="Priority Countries", icon="🚨"
+        "pages/05_Priority_Countries.py", label="Priority Risk Countries", icon="🚨"
     )
 
 
@@ -101,7 +101,7 @@ def student_home_nav():
 
 
 def explore_risk_map_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Explore Risk Map", icon="🗺️")
+    st.sidebar.page_link("pages/02_Map_Demo.py", label="Predictive Risk Map", icon="🗺️")
 
 
 def climate_events_nav():

@@ -1,8 +1,15 @@
 # TERRA — Tracking European Climate Risk & Refugee Asylum
 
 TERRA is a web app that links **climate, economic, and asylum data** for the 27 EU member states (2010–2023), so analysts, humanitarian coordinators, and displaced students can explore how climate stress drives forced migration. Climate change — rising temperatures, heatwaves, drought, and flooding — is already pushing people from their homes, yet no single tool brings the climate signals and the displacement data they cause into one place. TERRA fills that gap with role-specific dashboards, interactive maps, and two trained machine-learning models that predict asylum applications and climate stress, all served from a Streamlit front end on top of a Flask + MySQL backend.
+# Elevator Pitch
+“Wow, this weather is getting worse.” 
 
->  **Read about how we built it on our blog:** [TERRA Project Blog](ADD_BLOG_URL_HERE)
+For some people it’s just a complaint, for others it’s the reason they leave home. 
+That is why we built TERRA: Tracking European Climate Risk and Refugee Asylum is an app which helps explore how climate events and asylum trends are connected in the European Union. It brings climate, economic, asylum applications, NGO support and much more into one place. Our goal is to make complex figures easier to understand. With TERRA we will help users compare countries, track trends, and identify where humanitarian should be prioritized. 
+So come interact with TERRA, not just to view the data but to wonder what it tells us about who may need help next.
+
+
+>  **Read about how we built it on our blog:** [TERRA Project Blog](https://oliver-beaulieu.github.io/blog-team-6/)
 >
 
 
